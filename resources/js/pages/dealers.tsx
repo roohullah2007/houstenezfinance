@@ -17,6 +17,8 @@ const navLinks = [
     { label: 'Categories', href: '/categories' },
     { label: 'Locations', href: '/locations' },
     { label: 'Dealers', href: '/dealers' },
+    { label: 'Sell Your Car', href: '/sell-your-car' },
+    { label: 'Contact', href: '/contact' },
 ];
 
 const stats = [
@@ -73,13 +75,15 @@ export default function Dealers() {
                                 <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-2 ring-white/20 sm:flex">
                                     <span className="text-sm font-semibold text-white">HZ</span>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg hover:brightness-110"
-                                    style={{ backgroundColor: ACCENT }}
-                                >
-                                    Sell Car
-                                </button>
+                                <Link href="/sell-your-car">
+                                    <button
+                                        type="button"
+                                        className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg hover:brightness-110"
+                                        style={{ backgroundColor: ACCENT }}
+                                    >
+                                        Sell Car
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </header>

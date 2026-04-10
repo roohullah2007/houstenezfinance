@@ -37,11 +37,13 @@ import { Separator } from '@/components/ui/separator';
 const ACCENT = '#F26B5E';
 
 const navLinks = [
-    { label: 'Home', href: '#' },
+    { label: 'Home', href: '/' },
     { label: 'Car Listings', href: '/car-listings' },
     { label: 'Categories', href: '/categories' },
     { label: 'Locations', href: '/locations' },
     { label: 'Dealers', href: '/dealers' },
+    { label: 'Sell Your Car', href: '/sell-your-car' },
+    { label: 'Contact', href: '/contact' },
 ];
 
 const quickCategories = ['Sedans', 'Convertibles', 'Pickups', 'Coupe', 'SUVs'];
@@ -185,7 +187,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                     {/* Header / Nav */}
                     <header className="relative z-20">
-                        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+                        <div className="mx-auto flex h-20 max-w-[1408px] items-center justify-between px-4 sm:px-6 lg:px-8">
                             <Link href="/" className="flex items-center gap-2">
                                 <img
                                     src="/images/housten-logo.svg"
@@ -195,43 +197,36 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             </Link>
 
                             <nav className="hidden items-center gap-8 lg:flex">
-                                {navLinks.map((link) =>
-                                    link.href.startsWith('/') ? (
-                                        <Link
-                                            key={link.label}
-                                            href={link.href}
-                                            className="text-sm font-medium text-white/80 transition hover:text-white"
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    ) : (
-                                        <a
-                                            key={link.label}
-                                            href={link.href}
-                                            className="text-sm font-medium text-white/80 transition hover:text-white"
-                                        >
-                                            {link.label}
-                                        </a>
-                                    ),
-                                )}
+                                {navLinks.map((link) => (
+                                    <Link
+                                        key={link.label}
+                                        href={link.href}
+                                        className="text-sm font-medium text-white/80 transition hover:text-white"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
                             </nav>
 
                             <div className="flex items-center gap-3">
                                 <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-2 ring-white/20 sm:flex">
                                     <span className="text-sm font-semibold text-white">HZ</span>
                                 </div>
-                                <Button
-                                    className="rounded-full px-5 font-semibold text-white shadow-lg hover:brightness-110"
-                                    style={{ backgroundColor: ACCENT }}
-                                >
-                                    Sell Car
-                                </Button>
+                                <Link href="/sell-your-car">
+                                    <button
+                                        type="button"
+                                        className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg hover:brightness-110"
+                                        style={{ backgroundColor: ACCENT }}
+                                    >
+                                        Sell Car
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </header>
 
                     {/* Hero content */}
-                    <section className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-40 sm:px-6 lg:px-8 lg:pt-20 lg:pb-56">
+                    <section className="relative z-10 mx-auto max-w-[1408px] px-4 pt-10 pb-40 sm:px-6 lg:px-8 lg:pt-20 lg:pb-56">
                         <div className="grid items-center gap-12 lg:grid-cols-2">
                             <div>
                                 <Badge
@@ -444,7 +439,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                 <main>
                     {/* Popular body types */}
-                    <section id="categories" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                    <section id="categories" className="mx-auto max-w-[1408px] px-4 py-20 sm:px-6 lg:px-8">
                         <div className="mb-10 text-center">
                             <p className="text-sm font-semibold tracking-wider text-[#F26B5E] uppercase">
                                 Browse Categories
@@ -482,7 +477,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                     {/* Featured Listings */}
                     <section id="listings" className="bg-slate-50 py-20">
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="mx-auto max-w-[1408px] px-4 sm:px-6 lg:px-8">
                             <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
                                 <div>
                                     <p className="text-sm font-semibold tracking-wider text-[#F26B5E] uppercase">
@@ -585,7 +580,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     </section>
 
                     {/* Why Choose Us */}
-                    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                    <section className="mx-auto max-w-[1408px] px-4 py-20 sm:px-6 lg:px-8">
                         <div className="mb-12 text-center">
                             <p className="text-sm font-semibold tracking-wider text-[#F26B5E] uppercase">
                                 Why Choose Us
@@ -620,7 +615,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                     {/* Brands */}
                     <section className="border-y border-slate-200 bg-slate-50 py-12">
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="mx-auto max-w-[1408px] px-4 sm:px-6 lg:px-8">
                             <p className="mb-8 text-center text-sm font-semibold tracking-wider text-slate-500 uppercase">
                                 Browse by Brand
                             </p>
@@ -639,7 +634,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     </section>
 
                     {/* CTA Banner */}
-                    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                    <section className="mx-auto max-w-[1408px] px-4 py-20 sm:px-6 lg:px-8">
                         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b1020] via-[#1a1f3a] to-[#0b1020] p-10 text-white sm:p-14">
                             <div
                                 className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
@@ -668,7 +663,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                 {/* Footer */}
                 <footer className="bg-[#0b1020] text-white">
-                    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
                                 <img
