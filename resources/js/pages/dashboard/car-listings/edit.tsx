@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, Star } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
 const ACCENT = '#F26B5E';
@@ -47,6 +47,7 @@ interface CarListing {
     vehicle_type: string;
     description: string | null;
     images: string[] | null;
+    main_image_index: number;
     first_name: string;
     last_name: string;
     email: string;
@@ -61,7 +62,7 @@ interface Props {
 export default function EditCarListing({ listing }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [newPreviews, setNewPreviews] = useState<string[]>([]);
-    const [existingImages, setExistingImages] = useState<string[]>(listing.images || []);
+    const [existingImages] = useState<string[]>(listing.images || []);
     const [replaceImages, setReplaceImages] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -87,6 +88,7 @@ export default function EditCarListing({ listing }: Props) {
         email: listing.email,
         phone: listing.phone,
         status: listing.status,
+        main_image_index: listing.main_image_index ?? 0,
         images: [] as File[],
     });
 
@@ -97,13 +99,21 @@ export default function EditCarListing({ listing }: Props) {
         if (oversized.length > 0) { alert('Max 5MB per image.'); return; }
         setData('images', [...data.images, ...files]);
         setNewPreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
-        setReplaceImages(true);
+        if (!replaceImages) {
+            setData('main_image_index', 0);
+            setReplaceImages(true);
+        }
     }
 
     function removeNewImage(index: number) {
         setData('images', data.images.filter((_, i) => i !== index));
         URL.revokeObjectURL(newPreviews[index]);
         setNewPreviews((prev) => prev.filter((_, i) => i !== index));
+        if (data.main_image_index === index) {
+            setData('main_image_index', 0);
+        } else if (data.main_image_index > index) {
+            setData('main_image_index', data.main_image_index - 1);
+        }
     }
 
     function handleSubmit(e: FormEvent) {
@@ -235,18 +245,37 @@ export default function EditCarListing({ listing }: Props) {
 
                 {/* Images */}
                 <div className="rounded-xl bg-white p-6 shadow-sm">
-                    <h2 className="mb-4 text-base font-semibold text-gray-900">Images</h2>
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-base font-semibold text-gray-900">Images</h2>
+                        <p className="text-xs text-gray-500">Click the star to set main image</p>
+                    </div>
 
                     {/* Existing images */}
                     {existingImages.length > 0 && !replaceImages && (
                         <div className="mb-4">
                             <p className="mb-2 text-sm text-gray-500">Current images ({existingImages.length})</p>
                             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-                                {existingImages.map((img, i) => (
-                                    <div key={i} className="aspect-[4/3] overflow-hidden rounded-lg border border-gray-200">
-                                        <img src={`/storage/${img}`} alt="" className="h-full w-full object-cover" />
-                                    </div>
-                                ))}
+                                {existingImages.map((img, i) => {
+                                    const isMain = data.main_image_index === i;
+                                    return (
+                                        <div key={i} className={`group relative aspect-[4/3] overflow-hidden rounded-lg border-2 ${isMain ? 'border-[#F26B5E]' : 'border-gray-200'}`}>
+                                            <img src={`/storage/${img}`} alt="" className="h-full w-full object-cover" />
+                                            {isMain && (
+                                                <div className="absolute top-1 left-1 rounded-full bg-[#F26B5E] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                                    MAIN
+                                                </div>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => setData('main_image_index', i)}
+                                                className={`absolute bottom-1 left-1 flex h-6 w-6 items-center justify-center rounded-full ${isMain ? 'bg-[#F26B5E] text-white' : 'bg-white/90 text-gray-600 opacity-0 transition group-hover:opacity-100'}`}
+                                                title="Set as main image"
+                                            >
+                                                <Star className="h-3 w-3" fill={isMain ? 'currentColor' : 'none'} />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                             <p className="mt-2 text-xs text-gray-400">Upload new images below to replace these.</p>
                         </div>
@@ -254,14 +283,30 @@ export default function EditCarListing({ listing }: Props) {
 
                     {/* New image uploads */}
                     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-                        {newPreviews.map((src, i) => (
-                            <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-gray-200">
-                                <img src={src} alt="" className="h-full w-full object-cover" />
-                                <button type="button" onClick={() => removeNewImage(i)} className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition group-hover:opacity-100">
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </div>
-                        ))}
+                        {newPreviews.map((src, i) => {
+                            const isMain = replaceImages && data.main_image_index === i;
+                            return (
+                                <div key={i} className={`group relative aspect-[4/3] overflow-hidden rounded-lg border-2 ${isMain ? 'border-[#F26B5E]' : 'border-gray-200'}`}>
+                                    <img src={src} alt="" className="h-full w-full object-cover" />
+                                    {isMain && (
+                                        <div className="absolute top-1 left-1 rounded-full bg-[#F26B5E] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                            MAIN
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setData('main_image_index', i)}
+                                        className={`absolute bottom-1 left-1 flex h-6 w-6 items-center justify-center rounded-full ${isMain ? 'bg-[#F26B5E] text-white' : 'bg-white/90 text-gray-600 opacity-0 transition group-hover:opacity-100'}`}
+                                        title="Set as main image"
+                                    >
+                                        <Star className="h-3 w-3" fill={isMain ? 'currentColor' : 'none'} />
+                                    </button>
+                                    <button type="button" onClick={() => removeNewImage(i)} className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition group-hover:opacity-100">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </div>
+                            );
+                        })}
                         <button type="button" onClick={() => fileInputRef.current?.click()} className="flex aspect-[4/3] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 hover:border-[#F26B5E] hover:bg-[#F26B5E]/5">
                             <Upload className="mb-1 h-5 w-5 text-gray-400" />
                             <span className="text-xs text-gray-500">Upload</span>

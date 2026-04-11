@@ -20,6 +20,7 @@ interface CarListing {
     last_name: string;
     created_at: string;
     images: string[] | null;
+    main_image_index: number;
 }
 
 interface Props {

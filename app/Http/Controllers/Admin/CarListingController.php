@@ -66,6 +66,7 @@ class CarListingController extends Controller
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'status' => 'required|in:pending,approved,rejected',
+            'main_image_index' => 'nullable|integer|min:0',
             'images.*' => 'image|max:5120',
         ]);
 
@@ -77,6 +78,7 @@ class CarListingController extends Controller
         }
 
         $validated['images'] = $imagePaths;
+        $validated['main_image_index'] = (int) ($validated['main_image_index'] ?? 0);
         $validated['user_id'] = $request->user()->id;
 
         CarListing::create($validated);
@@ -122,6 +124,7 @@ class CarListingController extends Controller
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'status' => 'required|in:pending,approved,rejected',
+            'main_image_index' => 'nullable|integer|min:0',
             'images.*' => 'image|max:5120',
         ]);
 
@@ -140,6 +143,8 @@ class CarListingController extends Controller
         } else {
             unset($validated['images']);
         }
+
+        $validated['main_image_index'] = (int) ($validated['main_image_index'] ?? 0);
 
         $carListing->update($validated);
 

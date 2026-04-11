@@ -4,11 +4,46 @@ namespace App\Http\Controllers;
 
 use App\Models\CarListing;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class CarListingController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = CarListing::query()->where('status', 'approved')->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('make', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('state', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('vehicle_type')) {
+            $query->where('vehicle_type', $request->vehicle_type);
+        }
+
+        return Inertia::render('car-listings', [
+            'listings' => $query->paginate(20)->withQueryString(),
+            'filters' => $request->only(['search', 'vehicle_type']),
+        ]);
+    }
+
+    public function show(CarListing $carListing)
+    {
+        if ($carListing->status !== 'approved') {
+            abort(404);
+        }
+
+        return Inertia::render('car-listings/show', [
+            'listing' => $carListing,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('sell-your-car');
@@ -48,6 +83,7 @@ class CarListingController extends Controller
         }
 
         $validated['images'] = $imagePaths;
+        $validated['main_image_index'] = 0;
         $validated['user_id'] = $request->user()?->id;
         $validated['status'] = 'pending';
 

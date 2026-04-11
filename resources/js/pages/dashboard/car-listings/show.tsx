@@ -39,6 +39,7 @@ interface CarListing {
     vehicle_type: string;
     description: string | null;
     images: string[] | null;
+    main_image_index: number;
     first_name: string;
     last_name: string;
     email: string;
@@ -59,7 +60,7 @@ const STATUS_STYLES = {
 };
 
 export default function ShowCarListing({ listing }: Props) {
-    const [selectedImage, setSelectedImage] = useState(0);
+    const [selectedImage, setSelectedImage] = useState(listing.main_image_index ?? 0);
     const status = STATUS_STYLES[listing.status];
 
     function handleApprove() {
@@ -102,7 +103,7 @@ export default function ShowCarListing({ listing }: Props) {
                     <div className="flex items-center gap-3">
                         <Link
                             href="/admin/car-listings"
-                            className="rounded-lg border border-gray-300 p-2 transition hover:bg-gray-100600700"
+                            className="rounded-lg border border-gray-300 p-2 transition hover:bg-gray-100"
                         >
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
@@ -113,7 +114,7 @@ export default function ShowCarListing({ listing }: Props) {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <span className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium ${status.bg}`}>
                             {status.label}
                         </span>
@@ -156,8 +157,8 @@ export default function ShowCarListing({ listing }: Props) {
                     {/* Left Column — Images & Description */}
                     <div className="flex flex-col gap-6 lg:col-span-2">
                         {/* Image Gallery */}
-                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white700800">
-                            <div className="aspect-[16/10] w-full bg-gray-100700">
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                            <div className="aspect-[16/10] w-full bg-gray-100">
                                 {listing.images && listing.images.length > 0 ? (
                                     <img
                                         src={`/storage/${listing.images[selectedImage]}`}
@@ -172,7 +173,7 @@ export default function ShowCarListing({ listing }: Props) {
                                 )}
                             </div>
                             {listing.images && listing.images.length > 1 && (
-                                <div className="flex gap-2 overflow-x-auto border-t border-gray-200 p-3700">
+                                <div className="flex gap-2 overflow-x-auto border-t border-gray-200 p-3">
                                     {listing.images.map((img, i) => (
                                         <button
                                             key={i}
@@ -192,21 +193,21 @@ export default function ShowCarListing({ listing }: Props) {
 
                         {/* Description */}
                         {listing.description && (
-                            <div className="rounded-xl border border-gray-200 bg-white p-6700800">
+                            <div className="rounded-xl border border-gray-200 bg-white p-6">
                                 <h3 className="mb-3 text-lg font-semibold text-gray-900">Description</h3>
-                                <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600300">{listing.description}</p>
+                                <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600">{listing.description}</p>
                             </div>
                         )}
 
                         {/* Features */}
                         {listing.features && (
-                            <div className="rounded-xl border border-gray-200 bg-white p-6700800">
+                            <div className="rounded-xl border border-gray-200 bg-white p-6">
                                 <h3 className="mb-3 text-lg font-semibold text-gray-900">Features</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {listing.features.split(',').map((f, i) => (
                                         <span
                                             key={i}
-                                            className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700700300"
+                                            className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
                                         >
                                             {f.trim()}
                                         </span>
@@ -219,7 +220,7 @@ export default function ShowCarListing({ listing }: Props) {
                     {/* Right Column — Details & Seller Info */}
                     <div className="flex flex-col gap-6">
                         {/* Price Card */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6700800">
+                        <div className="rounded-xl border border-gray-200 bg-white p-6">
                             <div className="flex items-center gap-2">
                                 <DollarSign className="h-6 w-6 text-green-600" />
                                 <span className="text-3xl font-bold text-gray-900">
@@ -230,12 +231,12 @@ export default function ShowCarListing({ listing }: Props) {
                         </div>
 
                         {/* Vehicle Details */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6700800">
+                        <div className="rounded-xl border border-gray-200 bg-white p-6">
                             <h3 className="mb-4 text-lg font-semibold text-gray-900">Vehicle Details</h3>
                             <div className="space-y-3">
                                 {details.map((d, i) => (
-                                    <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0700">
-                                        <div className="flex items-center gap-2 text-sm text-gray-500400">
+                                    <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0">
+                                        <div className="flex items-center gap-2 text-sm text-gray-500">
                                             <d.icon className="h-4 w-4" />
                                             {d.label}
                                         </div>
@@ -246,7 +247,7 @@ export default function ShowCarListing({ listing }: Props) {
                         </div>
 
                         {/* Seller Info */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6700800">
+                        <div className="rounded-xl border border-gray-200 bg-white p-6">
                             <h3 className="mb-4 text-lg font-semibold text-gray-900">Seller Information</h3>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3">
@@ -259,19 +260,19 @@ export default function ShowCarListing({ listing }: Props) {
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600300">
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <Mail className="h-4 w-4 text-gray-400" />
                                     <a href={`mailto:${listing.email}`} className="hover:text-blue-600">{listing.email}</a>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600300">
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <Phone className="h-4 w-4 text-gray-400" />
                                     <a href={`tel:${listing.phone}`} className="hover:text-blue-600">{listing.phone}</a>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600300">
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <MapPin className="h-4 w-4 text-gray-400" />
                                     {listing.city}, {listing.state}
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600300">
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <Clock className="h-4 w-4 text-gray-400" />
                                     Submitted {new Date(listing.created_at).toLocaleDateString()}
                                 </div>

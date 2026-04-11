@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, Star } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
 const ACCENT = '#F26B5E';
@@ -54,6 +54,7 @@ export default function CreateCarListing() {
         email: '',
         phone: '',
         status: 'approved',
+        main_image_index: 0,
         images: [] as File[],
     });
 
@@ -70,6 +71,12 @@ export default function CreateCarListing() {
         setData('images', data.images.filter((_, i) => i !== index));
         URL.revokeObjectURL(previewImages[index]);
         setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+        // Reset main image if we removed it or one before it
+        if (data.main_image_index === index) {
+            setData('main_image_index', 0);
+        } else if (data.main_image_index > index) {
+            setData('main_image_index', data.main_image_index - 1);
+        }
     }
 
     function handleSubmit(e: FormEvent) {
@@ -202,16 +209,37 @@ export default function CreateCarListing() {
 
                 {/* Images */}
                 <div className="rounded-xl bg-white p-6 shadow-sm">
-                    <h2 className="mb-4 text-base font-semibold text-gray-900">Images (up to 12, max 5MB each)</h2>
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-base font-semibold text-gray-900">Images (up to 12, max 5MB each)</h2>
+                        {previewImages.length > 0 && (
+                            <p className="text-xs text-gray-500">Click the star icon to set the main image</p>
+                        )}
+                    </div>
                     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-                        {previewImages.map((src, i) => (
-                            <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-gray-200">
-                                <img src={src} alt="" className="h-full w-full object-cover" />
-                                <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition group-hover:opacity-100">
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </div>
-                        ))}
+                        {previewImages.map((src, i) => {
+                            const isMain = data.main_image_index === i;
+                            return (
+                                <div key={i} className={`group relative aspect-[4/3] overflow-hidden rounded-lg border-2 ${isMain ? 'border-[#F26B5E]' : 'border-gray-200'}`}>
+                                    <img src={src} alt="" className="h-full w-full object-cover" />
+                                    {isMain && (
+                                        <div className="absolute top-1 left-1 rounded-full bg-[#F26B5E] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                            MAIN
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setData('main_image_index', i)}
+                                        className={`absolute bottom-1 left-1 flex h-6 w-6 items-center justify-center rounded-full ${isMain ? 'bg-[#F26B5E] text-white' : 'bg-white/90 text-gray-600 opacity-0 transition group-hover:opacity-100'}`}
+                                        title="Set as main image"
+                                    >
+                                        <Star className="h-3 w-3" fill={isMain ? 'currentColor' : 'none'} />
+                                    </button>
+                                    <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition group-hover:opacity-100">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </div>
+                            );
+                        })}
                         {previewImages.length < 12 && (
                             <button type="button" onClick={() => fileInputRef.current?.click()} className="flex aspect-[4/3] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 hover:border-[#F26B5E] hover:bg-[#F26B5E]/5">
                                 <Upload className="mb-1 h-5 w-5 text-gray-400" />

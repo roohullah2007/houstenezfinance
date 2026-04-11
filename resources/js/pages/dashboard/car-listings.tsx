@@ -30,6 +30,7 @@ interface CarListing {
     phone: string;
     created_at: string;
     images: string[] | null;
+    main_image_index: number;
     vehicle_type: string;
     state: string;
     city: string;
@@ -197,7 +198,7 @@ export default function CarListings({ listings, filters }: Props) {
                                                         <div className="flex h-10 w-14 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                                                             {listing.images && listing.images.length > 0 ? (
                                                                 <img
-                                                                    src={`/storage/${listing.images[0]}`}
+                                                                    src={`/storage/${listing.images[listing.main_image_index ?? 0] ?? listing.images[0]}`}
                                                                     alt=""
                                                                     className="h-full w-full object-cover"
                                                                 />

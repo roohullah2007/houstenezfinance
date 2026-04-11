@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CarListing extends Model
 {
@@ -29,6 +30,7 @@ class CarListing extends Model
         'vehicle_type',
         'description',
         'images',
+        'main_image_index',
         'first_name',
         'last_name',
         'email',
@@ -43,11 +45,17 @@ class CarListing extends Model
             'price' => 'decimal:2',
             'year' => 'integer',
             'miles' => 'integer',
+            'main_image_index' => 'integer',
         ];
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(ListingInquiry::class);
     }
 }

@@ -10,6 +10,7 @@ import {
     Shield,
     Menu,
     X,
+    MessageSquare,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { AppLayoutProps } from '@/types';
@@ -19,6 +20,7 @@ const ACCENT = '#F26B5E';
 const navItems = [
     { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutGrid },
     { title: 'Car Listings', href: '/admin/car-listings', icon: Car },
+    { title: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
     { title: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
 ];
 

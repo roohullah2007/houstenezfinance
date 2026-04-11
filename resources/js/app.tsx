@@ -14,6 +14,7 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name === 'car-listings':
+            case name === 'car-listings/show':
             case name === 'categories':
             case name === 'locations':
             case name === 'dealers':

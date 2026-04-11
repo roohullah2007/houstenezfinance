@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { PublicHeader } from '@/components/public-header';
 import {
     Car,
     Upload,
@@ -166,42 +167,7 @@ export default function SellYourCar() {
                     />
                     <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-indigo-500/20 blur-3xl" />
 
-                    <header className="relative z-20">
-                        <div className="mx-auto flex h-20 max-w-[1408px] items-center justify-between px-4 sm:px-6 lg:px-8">
-                            <Link href="/" className="flex items-center gap-2">
-                                <img
-                                    src="/images/housten-logo.svg"
-                                    alt="Houston EZ Finance"
-                                    className="h-20 w-52 object-contain sm:h-24 sm:w-60 lg:h-28 lg:w-72"
-                                />
-                            </Link>
-                            <nav className="hidden items-center gap-8 lg:flex">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.label}
-                                        href={link.href}
-                                        className="text-sm font-medium text-white/80 transition hover:text-white"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-                            <div className="flex items-center gap-3">
-                                <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-2 ring-white/20 sm:flex">
-                                    <span className="text-sm font-semibold text-white">HZ</span>
-                                </div>
-                                <Link href="/sell-your-car">
-                                    <button
-                                        type="button"
-                                        className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg hover:brightness-110"
-                                        style={{ backgroundColor: ACCENT }}
-                                    >
-                                        Sell Car
-                                    </button>
-                                </Link>
-                            </div>
-                        </div>
-                    </header>
+                    <PublicHeader />
 
                     {/* Breadcrumb & Title */}
                     <div className="relative z-10 mx-auto max-w-[1408px] px-4 pb-12 pt-4 sm:px-6 lg:px-8">
