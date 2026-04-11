@@ -156,7 +156,7 @@ export default function ShowInquiry({ inquiry }: Props) {
                                 )}
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <Clock className="h-4 w-4 text-gray-400" />
-                                    {new Date(inquiry.created_at).toLocaleDateString()}
+                                    {new Date(inquiry.created_at).toLocaleDateString('en-US')}
                                 </div>
                             </div>
 

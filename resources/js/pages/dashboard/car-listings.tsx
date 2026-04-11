@@ -231,7 +231,7 @@ export default function CarListings({ listings, filters }: Props) {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-500">
-                                                    {new Date(listing.created_at).toLocaleDateString()}
+                                                    {new Date(listing.created_at).toLocaleDateString('en-US')}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center justify-end gap-1">

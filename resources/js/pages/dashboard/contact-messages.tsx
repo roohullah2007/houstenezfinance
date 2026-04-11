@@ -79,7 +79,7 @@ export default function ContactMessages({ messages }: Props) {
                                                 <p className="max-w-xs truncate text-xs text-gray-500">{msg.message}</p>
                                             </td>
                                             <td className="px-4 py-3 text-gray-500">
-                                                {new Date(msg.created_at).toLocaleDateString()}
+                                                {new Date(msg.created_at).toLocaleDateString('en-US')}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-1">

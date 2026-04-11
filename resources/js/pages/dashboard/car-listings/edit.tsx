@@ -157,10 +157,17 @@ export default function EditCarListing({ listing }: Props) {
                         </div>
                         <div>
                             <label className={labelClass}>Make</label>
-                            <select className={selectClass} value={data.make} onChange={(e) => { setData('make', e.target.value); }}>
-                                <option value="">Select Make</option>
-                                {MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
-                            </select>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                placeholder="e.g. Toyota, Lamborghini"
+                                list="make-suggestions-edit"
+                                value={data.make}
+                                onChange={(e) => setData('make', e.target.value)}
+                            />
+                            <datalist id="make-suggestions-edit">
+                                {MAKES.map((m) => <option key={m} value={m} />)}
+                            </datalist>
                             {errors.make && <p className="mt-1 text-xs text-red-500">{errors.make}</p>}
                         </div>
                         <div>

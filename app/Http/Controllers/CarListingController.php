@@ -27,9 +27,61 @@ class CarListingController extends Controller
             $query->where('vehicle_type', $request->vehicle_type);
         }
 
+        if ($request->filled('make')) {
+            $query->where('make', $request->make);
+        }
+
+        if ($request->filled('model')) {
+            $query->where('model', $request->model);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', (float) $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', (float) $request->max_price);
+        }
+
+        if ($request->filled('min_year')) {
+            $query->where('year', '>=', (int) $request->min_year);
+        }
+
+        if ($request->filled('max_year')) {
+            $query->where('year', '<=', (int) $request->max_year);
+        }
+
+        if ($request->filled('transmission')) {
+            $query->where('transmission', $request->transmission);
+        }
+
+        // Build filter metadata for dropdown population
+        $approved = CarListing::where('status', 'approved');
+        $yearBounds = (clone $approved)->selectRaw('MIN(year) as min, MAX(year) as max')->first();
+
+        $makesWithModels = (clone $approved)
+            ->select('make', 'model')
+            ->distinct()
+            ->orderBy('make')
+            ->orderBy('model')
+            ->get()
+            ->groupBy('make')
+            ->map(fn ($rows) => $rows->pluck('model')->unique()->values()->all())
+            ->toArray();
+
         return Inertia::render('car-listings', [
             'listings' => $query->paginate(20)->withQueryString(),
-            'filters' => $request->only(['search', 'vehicle_type']),
+            'filters' => $request->only([
+                'search', 'vehicle_type', 'make', 'model',
+                'min_price', 'max_price', 'min_year', 'max_year', 'transmission',
+            ]),
+            'filterMeta' => [
+                'priceMin' => 0,
+                'priceMax' => 2000000,
+                'yearMin' => (int) ($yearBounds->min ?? 2000),
+                'yearMax' => (int) ($yearBounds->max ?? 2026),
+                'makes' => $makesWithModels,
+            ],
         ]);
     }
 

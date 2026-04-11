@@ -3,8 +3,13 @@ import { PublicHeader } from '@/components/public-header';
 import {
     Search,
     Car,
-    ChevronLeft,
-    ChevronRight,
+    CarFront,
+    Tag,
+    Calendar,
+    ChevronDown,
+    SlidersHorizontal,
+    Bookmark,
+    X,
     Facebook,
     Twitter,
     Instagram,
@@ -12,7 +17,9 @@ import {
     Mail,
     MapPin,
 } from 'lucide-react';
-import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { RangeSlider } from '@/components/range-slider';
+import { useState, useEffect, useRef } from 'react';
 
 const ACCENT = '#F26B5E';
 
@@ -41,9 +48,30 @@ interface PaginatedListings {
     links: { url: string | null; label: string; active: boolean }[];
 }
 
+interface Filters {
+    search?: string;
+    vehicle_type?: string;
+    make?: string;
+    model?: string;
+    min_price?: string;
+    max_price?: string;
+    min_year?: string;
+    max_year?: string;
+    transmission?: string;
+}
+
+interface FilterMeta {
+    priceMin: number;
+    priceMax: number;
+    yearMin: number;
+    yearMax: number;
+    makes: Record<string, string[]>;
+}
+
 interface Props {
     listings: PaginatedListings;
-    filters: { search?: string; vehicle_type?: string };
+    filters: Filters;
+    filterMeta: FilterMeta;
 }
 
 function timeAgo(date: string): string {
@@ -56,16 +84,152 @@ function timeAgo(date: string): string {
     return `${Math.floor(days / 30)} months ago`;
 }
 
-export default function CarListings({ listings, filters }: Props) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [vehicleType, setVehicleType] = useState(filters.vehicle_type || '');
+function formatMoney(n: number | string): string {
+    const num = Number(n);
+    if (num >= 1000) return `$${(num / 1000).toFixed(num % 1000 === 0 ? 0 : 1)}k`;
+    return `$${num}`;
+}
 
-    function applyFilters() {
+// Hook to close a dropdown when clicking outside
+function useOutsideClick(ref: React.RefObject<HTMLElement | null>, onClose: () => void) {
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                onClose();
+            }
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [ref, onClose]);
+}
+
+export default function CarListings({ listings, filters, filterMeta }: Props) {
+    const [search, setSearch] = useState(filters.search || '');
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+    // Price state
+    const [minPrice, setMinPrice] = useState<number>(
+        filters.min_price ? Number(filters.min_price) : filterMeta.priceMin
+    );
+    const [maxPrice, setMaxPrice] = useState<number>(
+        filters.max_price ? Number(filters.max_price) : filterMeta.priceMax
+    );
+
+    // Make/Model state
+    const [selectedMake, setSelectedMake] = useState(filters.make || '');
+    const [selectedModel, setSelectedModel] = useState(filters.model || '');
+
+    // Year state
+    const [minYear, setMinYear] = useState<number>(
+        filters.min_year ? Number(filters.min_year) : filterMeta.yearMin
+    );
+    const [maxYear, setMaxYear] = useState<number>(
+        filters.max_year ? Number(filters.max_year) : filterMeta.yearMax
+    );
+
+    // Body type & full filters panel
+    const [bodyType, setBodyType] = useState(filters.vehicle_type || '');
+    const [transmission, setTransmission] = useState(filters.transmission || '');
+
+    function buildParams(overrides: Record<string, string | number | undefined> = {}): Record<string, string> {
+        const raw: Record<string, string | number | undefined> = {
+            search: search || undefined,
+            vehicle_type: bodyType || undefined,
+            make: selectedMake || undefined,
+            model: selectedModel || undefined,
+            min_price: minPrice !== filterMeta.priceMin ? minPrice : undefined,
+            max_price: maxPrice !== filterMeta.priceMax ? maxPrice : undefined,
+            min_year: minYear !== filterMeta.yearMin ? minYear : undefined,
+            max_year: maxYear !== filterMeta.yearMax ? maxYear : undefined,
+            transmission: transmission || undefined,
+            ...overrides,
+        };
         const params: Record<string, string> = {};
-        if (search) params.search = search;
-        if (vehicleType) params.vehicle_type = vehicleType;
-        router.get('/car-listings', params, { preserveState: true, replace: true });
+        Object.entries(raw).forEach(([k, v]) => {
+            if (v !== undefined && v !== '' && v !== null) params[k] = String(v);
+        });
+        return params;
     }
+
+    function go(params: Record<string, string>) {
+        router.get('/car-listings', params, { preserveState: true, replace: true });
+        setOpenDropdown(null);
+    }
+
+    function applySearch() {
+        go(buildParams());
+    }
+
+    function clearFilter(key: keyof Filters) {
+        const params = buildParams({ [key]: undefined });
+        // Also reset local state for that filter
+        if (key === 'min_price' || key === 'max_price') {
+            setMinPrice(filterMeta.priceMin);
+            setMaxPrice(filterMeta.priceMax);
+            delete params.min_price;
+            delete params.max_price;
+        }
+        if (key === 'min_year' || key === 'max_year') {
+            setMinYear(filterMeta.yearMin);
+            setMaxYear(filterMeta.yearMax);
+            delete params.min_year;
+            delete params.max_year;
+        }
+        if (key === 'make' || key === 'model') {
+            setSelectedMake('');
+            setSelectedModel('');
+            delete params.make;
+            delete params.model;
+        }
+        if (key === 'vehicle_type') {
+            setBodyType('');
+            delete params.vehicle_type;
+        }
+        if (key === 'search') {
+            setSearch('');
+            delete params.search;
+        }
+        if (key === 'transmission') {
+            setTransmission('');
+            delete params.transmission;
+        }
+        go(params);
+    }
+
+    function resetAll() {
+        setSearch('');
+        setBodyType('');
+        setSelectedMake('');
+        setSelectedModel('');
+        setMinPrice(filterMeta.priceMin);
+        setMaxPrice(filterMeta.priceMax);
+        setMinYear(filterMeta.yearMin);
+        setMaxYear(filterMeta.yearMax);
+        setTransmission('');
+        router.get('/car-listings', {}, { preserveState: true, replace: true });
+        setOpenDropdown(null);
+    }
+
+    // Refs for outside click handling
+    const priceRef = useRef<HTMLDivElement>(null);
+    const makeRef = useRef<HTMLDivElement>(null);
+    const yearRef = useRef<HTMLDivElement>(null);
+    const filtersRef = useRef<HTMLDivElement>(null);
+
+    useOutsideClick(priceRef, () => openDropdown === 'price' && setOpenDropdown(null));
+    useOutsideClick(makeRef, () => openDropdown === 'make' && setOpenDropdown(null));
+    useOutsideClick(yearRef, () => openDropdown === 'year' && setOpenDropdown(null));
+    useOutsideClick(filtersRef, () => openDropdown === 'filters' && setOpenDropdown(null));
+
+    const priceActive = filters.min_price || filters.max_price;
+    const makeActive = filters.make;
+    const yearActive = filters.min_year || filters.max_year;
+    const bodyActive = filters.vehicle_type;
+
+    const yearsList: number[] = [];
+    for (let y = filterMeta.yearMax; y >= filterMeta.yearMin; y--) yearsList.push(y);
+
+    const availableModels = selectedMake && filterMeta.makes[selectedMake] ? filterMeta.makes[selectedMake] : [];
 
     return (
         <>
@@ -82,47 +246,413 @@ export default function CarListings({ listings, filters }: Props) {
 
                     <PublicHeader />
 
-                    <div className="relative z-10 mx-auto max-w-[1408px] px-4 pb-12 pt-4 sm:px-6 lg:px-8">
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Car Listings</h1>
-                        <p className="mt-2 text-lg text-white/70">Browse {listings.total} {listings.total === 1 ? 'vehicle' : 'vehicles'} available now</p>
+                </div>
 
-                        {/* Search & Filter */}
-                        <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur sm:flex-row sm:items-center">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                                <input
-                                    type="text"
-                                    placeholder="Search by title, make, model, city..."
+                {/* Filter toolbar */}
+                <div className="border-b border-gray-200 bg-white">
+                    <div className="mx-auto flex min-h-[60px] max-w-[1408px] flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Search */}
+                            <div className="relative flex h-9 w-full items-center sm:w-[260px]">
+                                <Search className="absolute left-3 h-4 w-4 text-slate-500" />
+                                <Input
+                                    style={{ backgroundColor: '#ffffff' }}
+                                    placeholder="Search make, model, city"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-                                    className="w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/50 backdrop-blur focus:border-[#F26B5E] focus:outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                                    className="h-9 rounded-full border-gray-200 pl-9 text-[13px] text-slate-700 shadow-none placeholder:text-slate-500 focus-visible:ring-0"
                                 />
                             </div>
-                            <select
-                                value={vehicleType}
-                                onChange={(e) => setVehicleType(e.target.value)}
-                                className="rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white backdrop-blur focus:border-[#F26B5E] focus:outline-none"
-                            >
-                                <option value="" className="text-gray-900">All Types</option>
-                                {['Sedan','SUV','Truck','Coupe','Convertible','Hatchback','Van','Wagon','Crossover'].map((t) => (
-                                    <option key={t} value={t} className="text-gray-900">{t}</option>
-                                ))}
-                            </select>
+
+                            {/* Price */}
+                            <div className="relative" ref={priceRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenDropdown(openDropdown === 'price' ? null : 'price')}
+                                    className={`flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] ${priceActive ? 'border-[#F26B5E] bg-[#F26B5E]/10 text-[#F26B5E]' : 'border-gray-200 bg-white text-slate-700 hover:border-slate-300'}`}
+                                >
+                                    <Tag className="h-4 w-4" />
+                                    {priceActive
+                                        ? `${filters.min_price ? formatMoney(filters.min_price) : formatMoney(filterMeta.priceMin)} – ${filters.max_price ? formatMoney(filters.max_price) : formatMoney(filterMeta.priceMax)}`
+                                        : 'Price'}
+                                    {priceActive ? (
+                                        <X className="h-3 w-3" onClick={(e) => { e.stopPropagation(); clearFilter('min_price'); }} />
+                                    ) : (
+                                        <ChevronDown className="h-3 w-3" />
+                                    )}
+                                </button>
+                                {openDropdown === 'price' && (
+                                    <div className="absolute left-0 z-40 mt-2 w-80 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+                                        <h4 className="text-sm font-semibold text-slate-900">Price Range</h4>
+                                        <div className="mt-4 flex items-center justify-between text-xs text-slate-600">
+                                            <span className="font-semibold text-slate-900">${minPrice.toLocaleString()}</span>
+                                            <span className="font-semibold text-slate-900">${maxPrice.toLocaleString()}</span>
+                                        </div>
+                                        <div className="mt-3">
+                                            <RangeSlider
+                                                min={filterMeta.priceMin}
+                                                max={filterMeta.priceMax}
+                                                step={500}
+                                                minValue={minPrice}
+                                                maxValue={maxPrice}
+                                                onMinChange={setMinPrice}
+                                                onMaxChange={setMaxPrice}
+                                            />
+                                        </div>
+                                        <div className="mt-4 grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="text-[11px] text-slate-500">Min</label>
+                                                <input
+                                                    type="number"
+                                                    value={minPrice}
+                                                    onChange={(e) => setMinPrice(Math.min(Number(e.target.value) || 0, maxPrice))}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[11px] text-slate-500">Max</label>
+                                                <input
+                                                    type="number"
+                                                    value={maxPrice}
+                                                    onChange={(e) => setMaxPrice(Math.max(Number(e.target.value) || 0, minPrice))}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 flex justify-between">
+                                            <button
+                                                type="button"
+                                                onClick={() => { setMinPrice(filterMeta.priceMin); setMaxPrice(filterMeta.priceMax); clearFilter('min_price'); }}
+                                                className="text-xs text-slate-500 hover:text-slate-900"
+                                            >
+                                                Reset
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => go(buildParams({ min_price: minPrice, max_price: maxPrice }))}
+                                                className="rounded-lg px-4 py-1.5 text-xs font-semibold text-white"
+                                                style={{ backgroundColor: ACCENT }}
+                                            >
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Make & Model */}
+                            <div className="relative hidden lg:block" ref={makeRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenDropdown(openDropdown === 'make' ? null : 'make')}
+                                    className={`flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] ${makeActive ? 'border-[#F26B5E] bg-[#F26B5E]/10 text-[#F26B5E]' : 'border-gray-200 bg-white text-slate-700 hover:border-slate-300'}`}
+                                >
+                                    <Car className="h-4 w-4" />
+                                    {makeActive
+                                        ? `${filters.make}${filters.model ? ` ${filters.model}` : ''}`
+                                        : 'Make & Model'}
+                                    {makeActive ? (
+                                        <X className="h-3 w-3" onClick={(e) => { e.stopPropagation(); clearFilter('make'); }} />
+                                    ) : (
+                                        <ChevronDown className="h-3 w-3" />
+                                    )}
+                                </button>
+                                {openDropdown === 'make' && (
+                                    <div className="absolute left-0 z-40 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+                                        <h4 className="text-sm font-semibold text-slate-900">Make</h4>
+                                        <select
+                                            value={selectedMake}
+                                            onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel(''); }}
+                                            className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                        >
+                                            <option value="">Any Make</option>
+                                            {Object.keys(filterMeta.makes).map((m) => (
+                                                <option key={m} value={m}>{m}</option>
+                                            ))}
+                                        </select>
+                                        <h4 className="mt-4 text-sm font-semibold text-slate-900">Model</h4>
+                                        <select
+                                            value={selectedModel}
+                                            onChange={(e) => setSelectedModel(e.target.value)}
+                                            disabled={!selectedMake}
+                                            className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 focus:border-[#F26B5E] focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                                        >
+                                            <option value="">{selectedMake ? 'Any Model' : 'Select Make First'}</option>
+                                            {availableModels.map((m) => (
+                                                <option key={m} value={m}>{m}</option>
+                                            ))}
+                                        </select>
+                                        <div className="mt-4 flex justify-between">
+                                            <button
+                                                type="button"
+                                                onClick={() => { setSelectedMake(''); setSelectedModel(''); clearFilter('make'); }}
+                                                className="text-xs text-slate-500 hover:text-slate-900"
+                                            >
+                                                Reset
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => go(buildParams({ make: selectedMake || undefined, model: selectedModel || undefined }))}
+                                                className="rounded-lg px-4 py-1.5 text-xs font-semibold text-white"
+                                                style={{ backgroundColor: ACCENT }}
+                                            >
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Year */}
+                            <div className="relative hidden lg:block" ref={yearRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenDropdown(openDropdown === 'year' ? null : 'year')}
+                                    className={`flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] ${yearActive ? 'border-[#F26B5E] bg-[#F26B5E]/10 text-[#F26B5E]' : 'border-gray-200 bg-white text-slate-700 hover:border-slate-300'}`}
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    {yearActive
+                                        ? `${filters.min_year || filterMeta.yearMin} – ${filters.max_year || filterMeta.yearMax}`
+                                        : 'Year'}
+                                    {yearActive ? (
+                                        <X className="h-3 w-3" onClick={(e) => { e.stopPropagation(); clearFilter('min_year'); }} />
+                                    ) : (
+                                        <ChevronDown className="h-3 w-3" />
+                                    )}
+                                </button>
+                                {openDropdown === 'year' && (
+                                    <div className="absolute left-0 z-40 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+                                        <h4 className="text-sm font-semibold text-slate-900">Year Range</h4>
+                                        <div className="mt-3 grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="text-[11px] text-slate-500">From</label>
+                                                <select
+                                                    value={minYear}
+                                                    onChange={(e) => setMinYear(Math.min(Number(e.target.value), maxYear))}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                >
+                                                    {yearsList.map((y) => <option key={y} value={y}>{y}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-[11px] text-slate-500">To</label>
+                                                <select
+                                                    value={maxYear}
+                                                    onChange={(e) => setMaxYear(Math.max(Number(e.target.value), minYear))}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                >
+                                                    {yearsList.map((y) => <option key={y} value={y}>{y}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 flex justify-between">
+                                            <button
+                                                type="button"
+                                                onClick={() => { setMinYear(filterMeta.yearMin); setMaxYear(filterMeta.yearMax); clearFilter('min_year'); }}
+                                                className="text-xs text-slate-500 hover:text-slate-900"
+                                            >
+                                                Reset
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => go(buildParams({ min_year: minYear, max_year: maxYear }))}
+                                                className="rounded-lg px-4 py-1.5 text-xs font-semibold text-white"
+                                                style={{ backgroundColor: ACCENT }}
+                                            >
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Body type */}
+                            <div className="relative hidden lg:block">
+                                <select
+                                    value={bodyType}
+                                    onChange={(e) => {
+                                        setBodyType(e.target.value);
+                                        go(buildParams({ vehicle_type: e.target.value || undefined }));
+                                    }}
+                                    className={`h-9 appearance-none rounded-full border pl-9 pr-8 text-[13px] focus:outline-none ${bodyActive ? 'border-[#F26B5E] bg-[#F26B5E]/10 text-[#F26B5E]' : 'border-gray-200 bg-white text-slate-700 hover:border-slate-300'}`}
+                                >
+                                    <option value="">Body Type</option>
+                                    {['Sedan','SUV','Truck','Coupe','Convertible','Hatchback','Van','Wagon','Crossover'].map((t) => (
+                                        <option key={t} value={t}>{t}</option>
+                                    ))}
+                                </select>
+                                <CarFront className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${bodyActive ? 'text-[#F26B5E]' : 'text-slate-500'}`} />
+                                <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 ${bodyActive ? 'text-[#F26B5E]' : 'text-slate-500'}`} />
+                            </div>
+
+                            {/* Filters panel */}
+                            <div className="relative" ref={filtersRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenDropdown(openDropdown === 'filters' ? null : 'filters')}
+                                    className="flex h-9 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 text-[13px] text-slate-700 hover:border-slate-300"
+                                >
+                                    <SlidersHorizontal className="h-4 w-4" />
+                                    Filters
+                                </button>
+                                {openDropdown === 'filters' && (
+                                    <div className="absolute right-0 z-40 mt-2 w-[320px] rounded-xl border border-gray-200 bg-white p-5 shadow-xl sm:w-[380px]">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-base font-semibold text-slate-900">All Filters</h4>
+                                            <button onClick={() => setOpenDropdown(null)}>
+                                                <X className="h-4 w-4 text-slate-500" />
+                                            </button>
+                                        </div>
+
+                                        <div className="mt-4 space-y-4">
+                                            {/* Body type */}
+                                            <div>
+                                                <label className="text-xs font-medium text-slate-700">Body Type</label>
+                                                <select
+                                                    value={bodyType}
+                                                    onChange={(e) => setBodyType(e.target.value)}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                >
+                                                    <option value="">Any</option>
+                                                    {['Sedan','SUV','Truck','Coupe','Convertible','Hatchback','Van','Wagon','Crossover'].map((t) => (
+                                                        <option key={t} value={t}>{t}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Transmission */}
+                                            <div>
+                                                <label className="text-xs font-medium text-slate-700">Transmission</label>
+                                                <select
+                                                    value={transmission}
+                                                    onChange={(e) => setTransmission(e.target.value)}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                >
+                                                    <option value="">Any</option>
+                                                    <option value="Automatic">Automatic</option>
+                                                    <option value="Manual">Manual</option>
+                                                    <option value="CVT">CVT</option>
+                                                    <option value="Dual-Clutch">Dual-Clutch</option>
+                                                </select>
+                                            </div>
+
+                                            {/* Make */}
+                                            <div>
+                                                <label className="text-xs font-medium text-slate-700">Make</label>
+                                                <select
+                                                    value={selectedMake}
+                                                    onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel(''); }}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                >
+                                                    <option value="">Any Make</option>
+                                                    {Object.keys(filterMeta.makes).map((m) => (
+                                                        <option key={m} value={m}>{m}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Price */}
+                                            <div>
+                                                <label className="text-xs font-medium text-slate-700">
+                                                    Price: ${minPrice.toLocaleString()} – ${maxPrice.toLocaleString()}
+                                                </label>
+                                                <div className="mt-2">
+                                                    <RangeSlider
+                                                        min={filterMeta.priceMin}
+                                                        max={filterMeta.priceMax}
+                                                        step={500}
+                                                        minValue={minPrice}
+                                                        maxValue={maxPrice}
+                                                        onMinChange={setMinPrice}
+                                                        onMaxChange={setMaxPrice}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Year */}
+                                            <div>
+                                                <label className="text-xs font-medium text-slate-700">Year: {minYear} – {maxYear}</label>
+                                                <div className="mt-1 grid grid-cols-2 gap-2">
+                                                    <select
+                                                        value={minYear}
+                                                        onChange={(e) => setMinYear(Math.min(Number(e.target.value), maxYear))}
+                                                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                    >
+                                                        {yearsList.map((y) => <option key={y} value={y}>{y}</option>)}
+                                                    </select>
+                                                    <select
+                                                        value={maxYear}
+                                                        onChange={(e) => setMaxYear(Math.max(Number(e.target.value), minYear))}
+                                                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-slate-700 focus:border-[#F26B5E] focus:outline-none"
+                                                    >
+                                                        {yearsList.map((y) => <option key={y} value={y}>{y}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-5 flex justify-between border-t border-gray-100 pt-4">
+                                            <button
+                                                type="button"
+                                                onClick={resetAll}
+                                                className="text-sm text-slate-500 hover:text-slate-900"
+                                            >
+                                                Reset all
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => go(buildParams())}
+                                                className="rounded-lg px-5 py-2 text-sm font-semibold text-white"
+                                                style={{ backgroundColor: ACCENT }}
+                                            >
+                                                Apply Filters
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                onClick={applyFilters}
-                                className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white shadow-lg hover:brightness-110"
-                                style={{ backgroundColor: ACCENT }}
+                                className="flex h-9 items-center gap-1.5 rounded-full bg-black px-4 text-[12px] font-bold tracking-wider text-white hover:bg-slate-800"
                             >
-                                Search
+                                <Bookmark className="h-3.5 w-3.5" />
+                                SAVE SEARCH
                             </button>
                         </div>
                     </div>
                 </div>
 
+                {/* Section header */}
+                <div className="mx-auto max-w-[1408px] px-4 py-5 sm:px-6 lg:px-8">
+                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-900">All Listings</h2>
+                            {(filters.vehicle_type || filters.search) && (
+                                <p className="mt-1 text-sm text-slate-500">
+                                    {filters.vehicle_type && <>Filtered by <span className="font-semibold text-slate-700">{filters.vehicle_type}</span></>}
+                                    {filters.search && <> matching <span className="font-semibold text-slate-700">"{filters.search}"</span></>}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex flex-col items-start gap-1 sm:items-end">
+                            <button
+                                type="button"
+                                className="flex items-center gap-1 text-[13px] text-slate-700 hover:text-slate-900"
+                            >
+                                Sort: <span className="font-semibold">Recommended</span>
+                                <ChevronDown className="h-3 w-3" />
+                            </button>
+                            <p className="text-[12px] text-slate-500">{listings.total} {listings.total === 1 ? 'result' : 'results'}</p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Listings Grid */}
-                <div className="mx-auto max-w-[1408px] px-4 py-10 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-[1408px] px-4 pb-10 sm:px-6 lg:px-8">
                     {listings.data.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-gray-300 bg-white py-20 text-center">
                             <Car className="mx-auto h-16 w-16 text-gray-300" />

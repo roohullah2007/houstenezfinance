@@ -120,15 +120,22 @@ export default function CreateCarListing() {
                         </div>
                         <div>
                             <label className={labelClass}>Make</label>
-                            <select className={selectClass} value={data.make} onChange={(e) => { setData('make', e.target.value); setData('model', ''); }}>
-                                <option value="">Select Make</option>
-                                {MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
-                            </select>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                placeholder="e.g. Toyota, Lamborghini"
+                                list="make-suggestions"
+                                value={data.make}
+                                onChange={(e) => setData('make', e.target.value)}
+                            />
+                            <datalist id="make-suggestions">
+                                {MAKES.map((m) => <option key={m} value={m} />)}
+                            </datalist>
                             {errors.make && <p className="mt-1 text-xs text-red-500">{errors.make}</p>}
                         </div>
                         <div>
                             <label className={labelClass}>Model</label>
-                            <input type="text" className={inputClass} placeholder="Enter model" value={data.model} onChange={(e) => setData('model', e.target.value)} />
+                            <input type="text" className={inputClass} placeholder="e.g. Camry, Huracan" value={data.model} onChange={(e) => setData('model', e.target.value)} />
                             {errors.model && <p className="mt-1 text-xs text-red-500">{errors.model}</p>}
                         </div>
                         <div>

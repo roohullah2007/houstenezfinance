@@ -101,7 +101,7 @@ export default function Dashboard({ stats, recentListings }: Props) {
                                         <h3 className="font-medium text-gray-900 truncate">{listing.title}</h3>
                                         <p className="text-sm text-gray-500">
                                             {listing.first_name} {listing.last_name} &bull;{' '}
-                                            {new Date(listing.created_at).toLocaleDateString()}
+                                            {new Date(listing.created_at).toLocaleDateString('en-US')}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3">

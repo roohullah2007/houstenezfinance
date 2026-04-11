@@ -274,7 +274,7 @@ export default function ShowCarListing({ listing }: Props) {
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <Clock className="h-4 w-4 text-gray-400" />
-                                    Submitted {new Date(listing.created_at).toLocaleDateString()}
+                                    Submitted {new Date(listing.created_at).toLocaleDateString('en-US')}
                                 </div>
                             </div>
                         </div>

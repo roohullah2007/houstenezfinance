@@ -49,13 +49,20 @@ const navLinks = [
 
 const quickCategories = ['Sedans', 'Convertibles', 'Pickups', 'Coupe', 'SUVs'];
 
-const bodyTypes = [
-    { name: 'Sedan', offers: 128, Icon: Car },
-    { name: 'SUVs', offers: 96, Icon: CarFront },
-    { name: 'Coupe', offers: 54, Icon: Car },
-    { name: 'Convertibles', offers: 32, Icon: Caravan },
-    { name: 'MPV', offers: 47, Icon: Bus },
-];
+// Icon mapping for dynamic categories
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    Car,
+    CarFront,
+    Caravan,
+    Bus,
+};
+
+interface CategoryProp {
+    name: string;
+    vehicle_type: string;
+    icon: string;
+    offers: number;
+}
 
 const featuredListings = [
     {
@@ -163,7 +170,13 @@ const whyChoose = [
 
 const brands = ['Toyota', 'Honda', 'BMW', 'Mercedes', 'Ford', 'Tesla', 'Audi', 'Lexus'];
 
-export default function Welcome({ canRegister = true }: { canRegister?: boolean }) {
+export default function Welcome({
+    canRegister = true,
+    categories = [],
+}: {
+    canRegister?: boolean;
+    categories?: CategoryProp[];
+}) {
     void canRegister;
 
     return (
@@ -417,25 +430,30 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         </div>
 
                         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-                            {bodyTypes.map(({ name, offers, Icon }) => (
-                                <Card
-                                    key={name}
-                                    style={{ backgroundColor: '#f1f5f9' }}
-                                    className="group cursor-pointer rounded-xl border border-slate-200 text-slate-900 transition-all hover:-translate-y-1 hover:border-[#F26B5E] hover:shadow-xl"
-                                >
-                                    <CardContent className="flex flex-col items-center p-6 text-center">
-                                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm transition group-hover:bg-[#F26B5E]/10">
-                                            <Icon
-                                                className="h-8 w-8 text-slate-700 transition group-hover:text-[#F26B5E]"
-                                            />
-                                        </div>
-                                        <h3 className="font-semibold text-slate-900">{name}</h3>
-                                        <p className="mt-1 text-sm text-slate-500">
-                                            {offers} offers
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            {categories.map((cat) => {
+                                const Icon = iconMap[cat.icon] || Car;
+                                return (
+                                    <Link
+                                        key={cat.name}
+                                        href={`/car-listings?vehicle_type=${encodeURIComponent(cat.vehicle_type)}`}
+                                    >
+                                        <Card
+                                            style={{ backgroundColor: '#f1f5f9' }}
+                                            className="group cursor-pointer rounded-xl border border-slate-200 text-slate-900 transition-all hover:-translate-y-1 hover:border-[#F26B5E] hover:shadow-xl"
+                                        >
+                                            <CardContent className="flex flex-col items-center p-6 text-center">
+                                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm transition group-hover:bg-[#F26B5E]/10">
+                                                    <Icon className="h-8 w-8 text-slate-700 transition group-hover:text-[#F26B5E]" />
+                                                </div>
+                                                <h3 className="font-semibold text-slate-900">{cat.name}</h3>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    {cat.offers} {cat.offers === 1 ? 'offer' : 'offers'}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </section>
 
