@@ -85,6 +85,52 @@ class CarListingController extends Controller
         ]);
     }
 
+    public function suggestions(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (strlen($q) < 1) {
+            return response()->json([]);
+        }
+
+        $like = "%{$q}%";
+        $approved = CarListing::where('status', 'approved');
+
+        $titles = (clone $approved)
+            ->where('title', 'like', $like)
+            ->limit(5)
+            ->pluck('id', 'title')
+            ->map(fn ($id, $title) => ['type' => 'listing', 'label' => $title, 'value' => $title, 'id' => $id])
+            ->values();
+
+        $makes = (clone $approved)
+            ->where('make', 'like', $like)
+            ->distinct()
+            ->limit(5)
+            ->pluck('make')
+            ->map(fn ($make) => ['type' => 'make', 'label' => $make, 'value' => $make]);
+
+        $models = (clone $approved)
+            ->where('model', 'like', $like)
+            ->distinct()
+            ->limit(5)
+            ->pluck('model')
+            ->map(fn ($model) => ['type' => 'model', 'label' => $model, 'value' => $model]);
+
+        $cities = (clone $approved)
+            ->where('city', 'like', $like)
+            ->distinct()
+            ->limit(5)
+            ->pluck('city')
+            ->map(fn ($city) => ['type' => 'city', 'label' => $city, 'value' => $city]);
+
+        return response()->json([
+            'titles' => $titles,
+            'makes' => $makes,
+            'models' => $models,
+            'cities' => $cities,
+        ]);
+    }
+
     public function show(CarListing $carListing)
     {
         if ($carListing->status !== 'approved') {

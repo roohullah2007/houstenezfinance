@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { PublicHeader } from '@/components/public-header';
 import {
     Car,
@@ -47,7 +48,13 @@ const navLinks = [
     { label: 'Contact', href: '/contact' },
 ];
 
-const quickCategories = ['Sedans', 'Convertibles', 'Pickups', 'Coupe', 'SUVs'];
+const quickCategories: { label: string; vehicle_type: string }[] = [
+    { label: 'Sedans', vehicle_type: 'Sedan' },
+    { label: 'Convertibles', vehicle_type: 'Convertible' },
+    { label: 'Pickups', vehicle_type: 'Truck' },
+    { label: 'Coupe', vehicle_type: 'Coupe' },
+    { label: 'SUVs', vehicle_type: 'SUV' },
+];
 
 // Icon mapping for dynamic categories
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -170,14 +177,46 @@ const whyChoose = [
 
 const brands = ['Toyota', 'Honda', 'BMW', 'Mercedes', 'Ford', 'Tesla', 'Audi', 'Lexus'];
 
+interface SearchOptions {
+    makes: Record<string, string[]>;
+    cities: { city: string; state: string; label: string }[];
+    bodyTypes: string[];
+    transmissions: string[];
+}
+
 export default function Welcome({
     canRegister = true,
     categories = [],
+    searchOptions = { makes: {}, cities: [], bodyTypes: [], transmissions: [] },
 }: {
     canRegister?: boolean;
     categories?: CategoryProp[];
+    searchOptions?: SearchOptions;
 }) {
     void canRegister;
+
+    // Sentinel value for "no selection" (Radix Select disallows empty string)
+    const ANY = '__any';
+
+    const [searchMake, setSearchMake] = useState(ANY);
+    const [searchModel, setSearchModel] = useState(ANY);
+    const [searchTransmission, setSearchTransmission] = useState(ANY);
+    const [searchBodyType, setSearchBodyType] = useState(ANY);
+    const [searchLocation, setSearchLocation] = useState(ANY);
+
+    const availableSearchModels = searchMake !== ANY && searchOptions.makes[searchMake]
+        ? searchOptions.makes[searchMake]
+        : [];
+
+    function handleHeroSearch() {
+        const params: Record<string, string> = {};
+        if (searchMake !== ANY) params.make = searchMake;
+        if (searchModel !== ANY) params.model = searchModel;
+        if (searchTransmission !== ANY) params.transmission = searchTransmission;
+        if (searchBodyType !== ANY) params.vehicle_type = searchBodyType;
+        if (searchLocation !== ANY) params.search = searchLocation;
+        router.get('/car-listings', params);
+    }
 
     return (
         <>
@@ -334,66 +373,117 @@ export default function Welcome({
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                {[
-                                    {
-                                        ph: 'Any Make',
-                                        opts: ['Toyota', 'BMW', 'Ford', 'Tesla'],
-                                    },
-                                    {
-                                        ph: 'Any Model',
-                                        opts: ['Model S', 'X5', 'Corolla', 'F-150'],
-                                    },
-                                    {
-                                        ph: 'Condition',
-                                        opts: ['New', 'Used', 'Certified Pre-Owned'],
-                                    },
-                                    {
-                                        ph: 'Transmission',
-                                        opts: ['Automatic', 'Manual', 'CVT'],
-                                    },
-                                    {
-                                        ph: 'Body Type',
-                                        opts: ['Sedan', 'SUV', 'Coupe', 'Convertible'],
-                                    },
-                                    {
-                                        ph: 'Location',
-                                        opts: ['Houston', 'Dallas', 'Austin', 'San Antonio'],
-                                    },
-                                ].map((f) => (
-                                    <Select key={f.ph}>
-                                        <SelectTrigger
-                                            style={{ backgroundColor: '#ffffff' }}
-                                            className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0 data-[placeholder]:text-slate-500"
-                                        >
-                                            <SelectValue placeholder={f.ph} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {f.opts.map((o) => (
-                                                <SelectItem key={o} value={o.toLowerCase()}>
-                                                    {o}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                ))}
+                                {/* Make */}
+                                <Select
+                                    value={searchMake}
+                                    onValueChange={(v) => { setSearchMake(v); setSearchModel(ANY); }}
+                                >
+                                    <SelectTrigger
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0"
+                                    >
+                                        <SelectValue placeholder="Any Make" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={ANY}>Any Make</SelectItem>
+                                        {Object.keys(searchOptions.makes).map((m) => (
+                                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Model */}
+                                <Select
+                                    value={searchModel}
+                                    onValueChange={setSearchModel}
+                                    disabled={searchMake === ANY}
+                                >
+                                    <SelectTrigger
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0 disabled:opacity-60"
+                                    >
+                                        <SelectValue placeholder={searchMake !== ANY ? 'Any Model' : 'Select Make First'} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={ANY}>Any Model</SelectItem>
+                                        {availableSearchModels.map((m) => (
+                                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Transmission */}
+                                <Select
+                                    value={searchTransmission}
+                                    onValueChange={setSearchTransmission}
+                                >
+                                    <SelectTrigger
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0"
+                                    >
+                                        <SelectValue placeholder="Transmission" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={ANY}>Any Transmission</SelectItem>
+                                        {searchOptions.transmissions.map((t) => (
+                                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Body Type */}
+                                <Select
+                                    value={searchBodyType}
+                                    onValueChange={setSearchBodyType}
+                                >
+                                    <SelectTrigger
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0"
+                                    >
+                                        <SelectValue placeholder="Body Type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={ANY}>Any Body Type</SelectItem>
+                                        {searchOptions.bodyTypes.map((b) => (
+                                            <SelectItem key={b} value={b}>{b}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Location */}
+                                <Select
+                                    value={searchLocation}
+                                    onValueChange={setSearchLocation}
+                                >
+                                    <SelectTrigger
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        className="!h-12 w-full rounded-full border border-gray-200 px-5 text-[14px] font-medium text-slate-700 shadow-none transition hover:border-slate-300 focus:border-slate-400 focus:ring-0 lg:col-span-2"
+                                    >
+                                        <SelectValue placeholder="Location" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={ANY}>Any Location</SelectItem>
+                                        {searchOptions.cities.map((c) => (
+                                            <SelectItem key={c.label} value={c.city}>{c.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <div className="mt-6 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <a
-                                    href="#"
+                                <Link
+                                    href="/car-listings"
                                     className="text-sm font-medium text-slate-600 hover:text-slate-900"
                                 >
                                     + More Filters
-                                </a>
+                                </Link>
                                 <Button
-                                    asChild
+                                    onClick={handleHeroSearch}
                                     className="h-12 w-full rounded-md px-8 font-semibold text-white shadow-md hover:brightness-110 sm:w-auto"
                                     style={{ backgroundColor: ACCENT }}
                                 >
-                                    <Link href="/car-listings">
-                                        <Search className="mr-2 h-4 w-4" />
-                                        SEARCH LISTING
-                                    </Link>
+                                    <Search className="mr-2 h-4 w-4" />
+                                    SEARCH LISTING
                                 </Button>
                             </div>
                         </CardContent>
@@ -403,13 +493,13 @@ export default function Welcome({
                     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                         <span className="text-sm text-slate-500">Quick search:</span>
                         {quickCategories.map((c) => (
-                            <a
-                                key={c}
-                                href="#"
+                            <Link
+                                key={c.label}
+                                href={`/car-listings?vehicle_type=${encodeURIComponent(c.vehicle_type)}`}
                                 className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-[#F26B5E] hover:text-[#F26B5E]"
                             >
-                                {c}
-                            </a>
+                                {c.label}
+                            </Link>
                         ))}
                     </div>
                 </section>

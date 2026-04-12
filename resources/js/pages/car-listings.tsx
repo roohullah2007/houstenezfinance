@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { RangeSlider } from '@/components/range-slider';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 const ACCENT = '#F26B5E';
 
@@ -103,9 +103,27 @@ function useOutsideClick(ref: React.RefObject<HTMLElement | null>, onClose: () =
     }, [ref, onClose]);
 }
 
+interface SuggestionItem {
+    type: 'listing' | 'make' | 'model' | 'city';
+    label: string;
+    value: string;
+    id?: number;
+}
+
+interface SuggestionResponse {
+    titles: SuggestionItem[];
+    makes: SuggestionItem[];
+    models: SuggestionItem[];
+    cities: SuggestionItem[];
+}
+
 export default function CarListings({ listings, filters, filterMeta }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [suggestions, setSuggestions] = useState<SuggestionResponse | null>(null);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const searchRef = useRef<HTMLDivElement>(null);
 
     // Price state
     const [minPrice, setMinPrice] = useState<number>(
@@ -220,6 +238,94 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
     useOutsideClick(makeRef, () => openDropdown === 'make' && setOpenDropdown(null));
     useOutsideClick(yearRef, () => openDropdown === 'year' && setOpenDropdown(null));
     useOutsideClick(filtersRef, () => openDropdown === 'filters' && setOpenDropdown(null));
+    useOutsideClick(searchRef, () => setShowSuggestions(false));
+
+    // Debounced suggestion fetch
+    useEffect(() => {
+        if (!search || search.length < 1 || !showSuggestions) {
+            setSuggestions(null);
+            return;
+        }
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/car-listings/suggestions?q=${encodeURIComponent(search)}`, {
+                    signal: controller.signal,
+                    headers: { Accept: 'application/json' },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setSuggestions(data);
+                    setHighlightedIndex(-1);
+                }
+            } catch (e) {
+                // ignore abort / network errors
+            }
+        }, 200);
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [search, showSuggestions]);
+
+    // Flatten suggestions for keyboard navigation
+    const flatSuggestions = useMemo<SuggestionItem[]>(() => {
+        if (!suggestions) return [];
+        return [
+            ...suggestions.titles,
+            ...suggestions.makes,
+            ...suggestions.models,
+            ...suggestions.cities,
+        ];
+    }, [suggestions]);
+
+    function selectSuggestion(item: SuggestionItem) {
+        setShowSuggestions(false);
+        if (item.type === 'listing' && item.id) {
+            router.get(`/car-listings/${item.id}`);
+            return;
+        }
+        if (item.type === 'make') {
+            setSelectedMake(item.value);
+            setSelectedModel('');
+            go(buildParams({ search: undefined, make: item.value, model: undefined }));
+            setSearch('');
+            return;
+        }
+        if (item.type === 'model') {
+            setSelectedModel(item.value);
+            go(buildParams({ search: undefined, model: item.value }));
+            setSearch('');
+            return;
+        }
+        // city or fallback
+        setSearch(item.value);
+        go(buildParams({ search: item.value }));
+    }
+
+    function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (!showSuggestions || flatSuggestions.length === 0) {
+            if (e.key === 'Enter') applySearch();
+            return;
+        }
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlightedIndex((i) => (i + 1) % flatSuggestions.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlightedIndex((i) => (i - 1 + flatSuggestions.length) % flatSuggestions.length);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightedIndex >= 0) {
+                selectSuggestion(flatSuggestions[highlightedIndex]);
+            } else {
+                applySearch();
+                setShowSuggestions(false);
+            }
+        } else if (e.key === 'Escape') {
+            setShowSuggestions(false);
+        }
+    }
 
     const priceActive = filters.min_price || filters.max_price;
     const makeActive = filters.make;
@@ -252,17 +358,114 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                 <div className="border-b border-gray-200 bg-white">
                     <div className="mx-auto flex min-h-[60px] max-w-[1408px] flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
                         <div className="flex flex-wrap items-center gap-2">
-                            {/* Search */}
-                            <div className="relative flex h-9 w-full items-center sm:w-[260px]">
-                                <Search className="absolute left-3 h-4 w-4 text-slate-500" />
-                                <Input
-                                    style={{ backgroundColor: '#ffffff' }}
-                                    placeholder="Search make, model, city"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && applySearch()}
-                                    className="h-9 rounded-full border-gray-200 pl-9 text-[13px] text-slate-700 shadow-none placeholder:text-slate-500 focus-visible:ring-0"
-                                />
+                            {/* Search with autocomplete */}
+                            <div ref={searchRef} className="relative w-full sm:w-[260px]">
+                                <div className="relative flex h-9 items-center">
+                                    <Search className="absolute left-3 z-10 h-4 w-4 text-slate-500" />
+                                    <Input
+                                        style={{ backgroundColor: '#ffffff' }}
+                                        placeholder="Search make, model, city"
+                                        value={search}
+                                        onChange={(e) => {
+                                            setSearch(e.target.value);
+                                            setShowSuggestions(true);
+                                        }}
+                                        onFocus={() => search.length > 0 && setShowSuggestions(true)}
+                                        onKeyDown={handleSearchKeyDown}
+                                        className="h-9 rounded-full border-gray-200 pl-9 text-[13px] text-slate-700 shadow-none placeholder:text-slate-500 focus-visible:ring-0"
+                                    />
+                                </div>
+
+                                {showSuggestions && search.length > 0 && suggestions && flatSuggestions.length > 0 && (
+                                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[380px] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                                        {suggestions.titles.length > 0 && (
+                                            <div className="border-b border-gray-100 py-1">
+                                                <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Listings</p>
+                                                {suggestions.titles.map((item, i) => {
+                                                    const idx = i;
+                                                    return (
+                                                        <button
+                                                            key={`t-${item.id}`}
+                                                            type="button"
+                                                            onClick={() => selectSuggestion(item)}
+                                                            onMouseEnter={() => setHighlightedIndex(idx)}
+                                                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition ${highlightedIndex === idx ? 'bg-[#F26B5E]/10 text-[#F26B5E]' : 'text-slate-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            <Car className="h-3.5 w-3.5 flex-shrink-0" />
+                                                            <span className="truncate">{item.label}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {suggestions.makes.length > 0 && (
+                                            <div className="border-b border-gray-100 py-1">
+                                                <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Makes</p>
+                                                {suggestions.makes.map((item, i) => {
+                                                    const idx = suggestions.titles.length + i;
+                                                    return (
+                                                        <button
+                                                            key={`make-${item.value}`}
+                                                            type="button"
+                                                            onClick={() => selectSuggestion(item)}
+                                                            onMouseEnter={() => setHighlightedIndex(idx)}
+                                                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition ${highlightedIndex === idx ? 'bg-[#F26B5E]/10 text-[#F26B5E]' : 'text-slate-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            <Tag className="h-3.5 w-3.5 flex-shrink-0" />
+                                                            {item.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {suggestions.models.length > 0 && (
+                                            <div className="border-b border-gray-100 py-1">
+                                                <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Models</p>
+                                                {suggestions.models.map((item, i) => {
+                                                    const idx = suggestions.titles.length + suggestions.makes.length + i;
+                                                    return (
+                                                        <button
+                                                            key={`model-${item.value}`}
+                                                            type="button"
+                                                            onClick={() => selectSuggestion(item)}
+                                                            onMouseEnter={() => setHighlightedIndex(idx)}
+                                                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition ${highlightedIndex === idx ? 'bg-[#F26B5E]/10 text-[#F26B5E]' : 'text-slate-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            <CarFront className="h-3.5 w-3.5 flex-shrink-0" />
+                                                            {item.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {suggestions.cities.length > 0 && (
+                                            <div className="py-1">
+                                                <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Cities</p>
+                                                {suggestions.cities.map((item, i) => {
+                                                    const idx = suggestions.titles.length + suggestions.makes.length + suggestions.models.length + i;
+                                                    return (
+                                                        <button
+                                                            key={`city-${item.value}`}
+                                                            type="button"
+                                                            onClick={() => selectSuggestion(item)}
+                                                            onMouseEnter={() => setHighlightedIndex(idx)}
+                                                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition ${highlightedIndex === idx ? 'bg-[#F26B5E]/10 text-[#F26B5E]' : 'text-slate-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                                                            {item.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {showSuggestions && search.length > 0 && suggestions && flatSuggestions.length === 0 && (
+                                    <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-gray-200 bg-white p-4 text-center text-sm text-slate-500 shadow-xl">
+                                        No matches found
+                                    </div>
+                                )}
                             </div>
 
                             {/* Price */}
@@ -631,11 +834,59 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                         <div>
                             <h2 className="text-xl font-bold text-slate-900">All Listings</h2>
-                            {(filters.vehicle_type || filters.search) && (
-                                <p className="mt-1 text-sm text-slate-500">
-                                    {filters.vehicle_type && <>Filtered by <span className="font-semibold text-slate-700">{filters.vehicle_type}</span></>}
-                                    {filters.search && <> matching <span className="font-semibold text-slate-700">"{filters.search}"</span></>}
-                                </p>
+                            {(filters.vehicle_type || filters.search || filters.make || filters.model || filters.transmission || filters.min_price || filters.max_price || filters.min_year || filters.max_year) && (
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <span className="text-xs text-slate-500">Active filters:</span>
+                                    {filters.make && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            Make: {filters.make}
+                                            <button type="button" onClick={() => clearFilter('make')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {filters.model && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            Model: {filters.model}
+                                            <button type="button" onClick={() => clearFilter('model')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {filters.vehicle_type && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            {filters.vehicle_type}
+                                            <button type="button" onClick={() => clearFilter('vehicle_type')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {filters.transmission && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            {filters.transmission}
+                                            <button type="button" onClick={() => clearFilter('transmission')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {(filters.min_price || filters.max_price) && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            ${Number(filters.min_price || filterMeta.priceMin).toLocaleString()} – ${Number(filters.max_price || filterMeta.priceMax).toLocaleString()}
+                                            <button type="button" onClick={() => clearFilter('min_price')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {(filters.min_year || filters.max_year) && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            {filters.min_year || filterMeta.yearMin} – {filters.max_year || filterMeta.yearMax}
+                                            <button type="button" onClick={() => clearFilter('min_year')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    {filters.search && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F26B5E]/10 px-3 py-1 text-xs font-medium text-[#F26B5E]">
+                                            "{filters.search}"
+                                            <button type="button" onClick={() => clearFilter('search')}><X className="h-3 w-3" /></button>
+                                        </span>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={resetAll}
+                                        className="text-xs text-slate-500 underline hover:text-slate-900"
+                                    >
+                                        Clear all
+                                    </button>
+                                </div>
                             )}
                         </div>
                         <div className="flex flex-col items-start gap-1 sm:items-end">

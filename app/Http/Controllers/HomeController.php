@@ -10,9 +10,10 @@ class HomeController extends Controller
 {
     public function index()
     {
+        $approved = CarListing::where('status', 'approved');
+
         // Count approved listings grouped by vehicle_type
-        $categoryCounts = CarListing::query()
-            ->where('status', 'approved')
+        $categoryCounts = (clone $approved)
             ->selectRaw('vehicle_type, COUNT(*) as total')
             ->groupBy('vehicle_type')
             ->pluck('total', 'vehicle_type')
@@ -32,10 +33,37 @@ class HomeController extends Controller
             return $cat;
         }, $categories);
 
+        // Makes with models for hero search form
+        $makesWithModels = (clone $approved)
+            ->select('make', 'model')
+            ->distinct()
+            ->orderBy('make')
+            ->orderBy('model')
+            ->get()
+            ->groupBy('make')
+            ->map(fn ($rows) => $rows->pluck('model')->unique()->values()->all())
+            ->toArray();
+
+        // Distinct cities for Location dropdown
+        $cities = (clone $approved)
+            ->select('city', 'state')
+            ->distinct()
+            ->orderBy('city')
+            ->get()
+            ->map(fn ($r) => ['city' => $r->city, 'state' => $r->state, 'label' => "{$r->city}, {$r->state}"])
+            ->values()
+            ->toArray();
+
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),
             'categories' => $categories,
-            'featuredListings' => CarListing::where('status', 'approved')
+            'searchOptions' => [
+                'makes' => $makesWithModels,
+                'cities' => $cities,
+                'bodyTypes' => ['Sedan', 'SUV', 'Truck', 'Coupe', 'Convertible', 'Hatchback', 'Van', 'Wagon', 'Crossover'],
+                'transmissions' => ['Automatic', 'Manual', 'CVT', 'Dual-Clutch'],
+            ],
+            'featuredListings' => (clone $approved)
                 ->latest()
                 ->take(8)
                 ->get(),

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/car-listings', [CarListingController::class, 'index'])->name('car-listings');
+Route::get('/car-listings/suggestions', [CarListingController::class, 'suggestions'])->name('car-listings.suggestions');
 Route::get('/car-listings/{carListing}', [CarListingController::class, 'show'])->name('car-listings.show');
 Route::post('/car-listings/{carListing}/inquiry', [InquiryController::class, 'store'])->name('car-listings.inquiry');
 Route::inertia('/categories', 'categories')->name('categories');
