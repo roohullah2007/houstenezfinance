@@ -7,6 +7,7 @@ const ACCENT = '#F26B5E';
 const navLinks = [
     { label: 'Home', href: '/' },
     { label: 'Car Listings', href: '/car-listings' },
+    { label: 'Real Estate', href: '/real-estate' },
     { label: 'Categories', href: '/categories' },
     { label: 'Locations', href: '/locations' },
     { label: 'Dealers', href: '/dealers' },
@@ -14,17 +15,22 @@ const navLinks = [
     { label: 'Contact', href: '/contact' },
 ];
 
-export function PublicHeader() {
+interface PublicHeaderProps {
+    logoClassName?: string;
+    headerClassName?: string;
+}
+
+export function PublicHeader({ logoClassName, headerClassName }: PublicHeaderProps = {}) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
         <header className="relative z-20">
-            <div className="mx-auto flex h-20 max-w-[1408px] items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div className={`mx-auto flex max-w-[1408px] items-center justify-between px-4 sm:px-6 lg:px-8 ${headerClassName ?? 'h-20'}`}>
                 <Link href="/" className="flex items-center gap-2">
                     <img
-                        src="/images/housten-logo.svg"
+                        src="/images/housten-logo-1.png"
                         alt="Houston EZ Finance"
-                        className="h-14 w-36 object-contain sm:h-20 sm:w-52 md:h-24 md:w-60 lg:h-28 lg:w-72"
+                        className={logoClassName ?? 'h-14 w-36 object-contain sm:h-20 sm:w-52 md:h-24 md:w-60 lg:h-28 lg:w-72'}
                     />
                 </Link>
 

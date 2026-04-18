@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarListing;
+use App\Support\SpamProtection;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class CarListingController extends Controller
@@ -149,6 +151,10 @@ class CarListingController extends Controller
 
     public function store(Request $request)
     {
+        if (filled($request->input('website'))) {
+            return redirect()->route('sell-your-car')->with('success', 'Your listing has been submitted for review!');
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'state' => 'required|string|max:100',
@@ -166,12 +172,23 @@ class CarListingController extends Controller
             'transmission' => 'required|string|max:50',
             'vehicle_type' => 'required|string|max:50',
             'description' => 'nullable|string',
+            'video_url' => 'nullable|url|max:500',
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'images.*' => 'image|max:5120',
+            'captcha_token' => 'required|string',
+            'captcha_answer' => 'required|string',
         ]);
+
+        if (! SpamProtection::verify($validated['captcha_token'], $validated['captcha_answer'])) {
+            throw ValidationException::withMessages([
+                'captcha_answer' => 'Incorrect answer. Please try again.',
+            ]);
+        }
+
+        unset($validated['captcha_token'], $validated['captcha_answer']);
 
         $imagePaths = [];
         if ($request->hasFile('images')) {

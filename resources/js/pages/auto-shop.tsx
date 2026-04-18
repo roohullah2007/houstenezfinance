@@ -70,7 +70,7 @@ export default function AutoShop() {
                         <div className="mx-auto flex h-20 max-w-[1408px] items-center justify-between px-4 sm:px-6 lg:px-8">
                             <Link href="/" className="flex items-center gap-2">
                                 <img
-                                    src="/images/housten-logo.svg"
+                                    src="/images/housten-logo-1.png"
                                     alt="Houston EZ Finance"
                                     className="h-14 w-40 object-contain sm:h-16 sm:w-48"
                                 />
@@ -261,7 +261,7 @@ export default function AutoShop() {
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <img src="/images/housten-logo.svg" alt="Houston EZ Finance" className="h-14 w-auto" />
+                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
                                 <p className="mt-4 text-sm leading-relaxed text-white/60">
                                     Your trusted marketplace for quality vehicles and hassle-free auto financing in Houston and beyond.
                                 </p>
@@ -302,15 +302,15 @@ export default function AutoShop() {
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
                                     <li className="flex items-start gap-2">
                                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                                        1234 Main St, Houston, TX 77002
+                                        3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        (713) 555-0123
+                                        832-322-2354
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 shrink-0" />
-                                        hello@houstonezfinance.com
+                                        houstonezfinance@gmail.com
                                     </li>
                                 </ul>
                             </div>

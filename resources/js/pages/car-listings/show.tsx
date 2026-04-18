@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { PublicHeader } from '@/components/public-header';
+import { CaptchaField } from '@/components/captcha-field';
 import {
     ChevronLeft,
     ChevronRight,
@@ -17,6 +18,7 @@ import {
     Instagram,
     Send,
     CheckCircle2,
+    Youtube,
 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
@@ -40,6 +42,7 @@ interface CarListing {
     transmission: string;
     vehicle_type: string;
     description: string | null;
+    video_url: string | null;
     images: string[] | null;
     main_image_index: number;
     first_name: string;
@@ -62,6 +65,9 @@ export default function ShowCarListing({ listing }: Props) {
         email: '',
         phone: '',
         message: `I'm interested in the ${listing.year} ${listing.make} ${listing.model}. Please contact me.`,
+        captcha_token: '',
+        captcha_answer: '',
+        website: '',
     });
 
     function handleInquirySubmit(e: FormEvent) {
@@ -74,6 +80,19 @@ export default function ShowCarListing({ listing }: Props) {
             },
         });
     }
+
+    function getYouTubeEmbedId(url: string | null): string | null {
+        if (!url) return null;
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+        ];
+        for (const p of patterns) {
+            const m = url.match(p);
+            if (m) return m[1];
+        }
+        return null;
+    }
+    const videoId = getYouTubeEmbedId(listing.video_url);
 
     const details = [
         { icon: Calendar, label: 'Year', value: listing.year },
@@ -183,6 +202,38 @@ export default function ShowCarListing({ listing }: Props) {
                                 </div>
                             </div>
 
+                            {/* Video */}
+                            {listing.video_url && (
+                                <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                                    <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900">
+                                        <Youtube className="h-5 w-5" style={{ color: ACCENT }} />
+                                        Video
+                                    </h3>
+                                    {videoId ? (
+                                        <div className="aspect-video w-full overflow-hidden rounded-xl">
+                                            <iframe
+                                                src={`https://www.youtube.com/embed/${videoId}`}
+                                                title="Vehicle video"
+                                                className="h-full w-full"
+                                                frameBorder={0}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        </div>
+                                    ) : (
+                                        <a
+                                            href={listing.video_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-sm font-medium text-[#F26B5E] hover:underline"
+                                        >
+                                            <Youtube className="h-4 w-4" />
+                                            Watch video
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Description */}
                             {listing.description && (
                                 <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -283,6 +334,7 @@ export default function ShowCarListing({ listing }: Props) {
                                             />
                                             {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
                                         </div>
+                                        <CaptchaField data={data} setData={setData} errors={errors} />
                                         <button
                                             type="submit"
                                             disabled={processing}
@@ -308,7 +360,7 @@ export default function ShowCarListing({ listing }: Props) {
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <img src="/images/housten-logo.svg" alt="Houston EZ Finance" className="h-14 w-auto" />
+                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
                                 <p className="mt-4 text-sm leading-relaxed text-white/60">Your trusted marketplace for quality vehicles and hassle-free auto financing in Houston and beyond.</p>
                                 <div className="mt-5 flex items-center gap-3">
                                     {[Facebook, Twitter, Instagram].map((Icon, i) => (
@@ -329,9 +381,9 @@ export default function ShowCarListing({ listing }: Props) {
                             <div>
                                 <h4 className="text-sm font-semibold tracking-wider uppercase">Contact</h4>
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />1234 Main St, Houston, TX 77002</li>
-                                    <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" />(713) 555-0123</li>
-                                    <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" />hello@houstonezfinance.com</li>
+                                    <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082</li>
+                                    <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" />832-322-2354</li>
+                                    <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" />houstonezfinance@gmail.com</li>
                                 </ul>
                             </div>
                             <div>

@@ -2,25 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CarListing;
-use App\Models\ListingInquiry;
+use App\Models\ContactMessage;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
-class InquiryController extends Controller
+class RealEstateController extends Controller
 {
-    public function store(Request $request, CarListing $carListing)
+    public function index()
+    {
+        return Inertia::render('real-estate');
+    }
+
+    public function store(Request $request)
     {
         if (filled($request->input('website'))) {
-            return back()->with('success', 'Your message has been sent! We will contact you shortly.');
+            return redirect()->route('real-estate')->with('success', 'Thanks! A real estate specialist will reach out shortly.');
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:20',
-            'message' => 'required|string|max:2000',
+            'inquiry_type' => 'required|string|max:100',
+            'property_interest' => 'nullable|string|max:255',
+            'message' => 'required|string',
             'captcha_token' => 'required|string',
             'captcha_answer' => 'required|string',
         ]);
@@ -31,14 +38,19 @@ class InquiryController extends Controller
             ]);
         }
 
-        $carListing->inquiries()->create([
+        $subjectParts = ['Real Estate — ' . $validated['inquiry_type']];
+        if (! empty($validated['property_interest'])) {
+            $subjectParts[] = $validated['property_interest'];
+        }
+
+        ContactMessage::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
+            'subject' => implode(' — ', $subjectParts),
             'message' => $validated['message'],
-            'status' => 'new',
         ]);
 
-        return back()->with('success', 'Your message has been sent! We will contact you shortly.');
+        return redirect()->route('real-estate')->with('success', 'Thanks! A real estate specialist will reach out shortly.');
     }
 }

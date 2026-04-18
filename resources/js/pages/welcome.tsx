@@ -239,7 +239,10 @@ export default function Welcome({
                     <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-indigo-500/20 blur-3xl" />
 
                     {/* Header / Nav */}
-                    <PublicHeader />
+                    <PublicHeader
+                        headerClassName="h-24 sm:h-28 md:h-32 lg:h-32"
+                        logoClassName="h-16 w-40 object-contain sm:h-24 sm:w-60 md:h-28 md:w-72 lg:h-32 lg:w-80"
+                    />
 
                     {/* Hero content */}
                     <section className="relative z-10 mx-auto max-w-[1408px] px-4 pt-10 pb-40 sm:px-6 lg:px-8 lg:pt-20 lg:pb-56">
@@ -257,9 +260,9 @@ export default function Welcome({
                                     <span style={{ color: ACCENT }}>in a few minutes</span>
                                 </h1>
                                 <p className="mt-5 max-w-xl text-base text-white/70 sm:text-lg">
-                                    Browse thousands of verified listings from trusted dealers and
-                                    private sellers. Finance, inspect, and drive away with
-                                    confidence.
+                                    Browse thousands of verified listings from trusted In House
+                                    Finance Dealers and Private Sellers. Finance, Inspect, and
+                                    Drive Away with Confidence.
                                 </p>
 
                                 <div className="mt-6 flex items-center gap-3">
@@ -739,7 +742,7 @@ export default function Welcome({
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
                                 <img
-                                    src="/images/housten-logo.svg"
+                                    src="/images/housten-logo-1.png"
                                     alt="Houston EZ Finance"
                                     className="h-14 w-auto"
                                 />
@@ -805,15 +808,15 @@ export default function Welcome({
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
                                     <li className="flex items-start gap-2">
                                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                                        1234 Main St, Houston, TX 77002
+                                        3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        (713) 555-0123
+                                        832-322-2354
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 shrink-0" />
-                                        hello@houstonezfinance.com
+                                        houstonezfinance@gmail.com
                                     </li>
                                 </ul>
                             </div>

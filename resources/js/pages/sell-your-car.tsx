@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { PublicHeader } from '@/components/public-header';
+import { CaptchaField } from '@/components/captcha-field';
 import {
     Car,
     Upload,
@@ -102,11 +103,15 @@ export default function SellYourCar() {
         transmission: '',
         vehicle_type: '',
         description: '',
+        video_url: '',
         first_name: '',
         last_name: '',
         email: '',
         phone: '',
         images: [] as File[],
+        captcha_token: '',
+        captcha_answer: '',
+        website: '',
     });
 
     const availableModels = data.make ? (MODELS_BY_MAKE[data.make] || []) : [];
@@ -473,6 +478,20 @@ export default function SellYourCar() {
                                     />
                                     {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description}</p>}
                                 </div>
+
+                                {/* YouTube Video URL - full width */}
+                                <div className="sm:col-span-2 lg:col-span-3">
+                                    <label className={labelClass}>YouTube Video URL (optional)</label>
+                                    <input
+                                        type="url"
+                                        className={inputClass}
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        value={data.video_url}
+                                        onChange={(e) => setData('video_url', e.target.value)}
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">Paste a YouTube link so buyers can watch a video of your vehicle.</p>
+                                    {errors.video_url && <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>}
+                                </div>
                             </div>
                         </div>
 
@@ -588,6 +607,9 @@ export default function SellYourCar() {
                                     />
                                     {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
                                 </div>
+                                <div className="sm:col-span-2">
+                                    <CaptchaField data={data} setData={setData} errors={errors} />
+                                </div>
                             </div>
                         </div>
 
@@ -615,7 +637,7 @@ export default function SellYourCar() {
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <img src="/images/housten-logo.svg" alt="Houston EZ Finance" className="h-14 w-auto" />
+                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
                                 <p className="mt-4 text-sm leading-relaxed text-white/60">
                                     Your trusted marketplace for quality vehicles and hassle-free auto financing in Houston and beyond.
                                 </p>
@@ -646,9 +668,9 @@ export default function SellYourCar() {
                             <div>
                                 <h4 className="text-sm font-semibold tracking-wider uppercase">Contact</h4>
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />1234 Main St, Houston, TX 77002</li>
-                                    <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" />(713) 555-0123</li>
-                                    <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" />hello@houstonezfinance.com</li>
+                                    <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082</li>
+                                    <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" />832-322-2354</li>
+                                    <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" />houstonezfinance@gmail.com</li>
                                 </ul>
                             </div>
                         </div>

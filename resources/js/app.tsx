@@ -20,6 +20,7 @@ createInertiaApp({
             case name === 'dealers':
             case name === 'sell-your-car':
             case name === 'contact':
+            case name === 'real-estate':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

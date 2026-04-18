@@ -8,6 +8,7 @@ use App\Http\Controllers\CarListingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InquiryController;
+use App\Http\Controllers\RealEstateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,6 +26,9 @@ Route::post('/sell-your-car', [CarListingController::class, 'store'])->name('sel
 
 Route::get('/contact', [ContactController::class, 'create'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
+Route::get('/real-estate', [RealEstateController::class, 'index'])->name('real-estate');
+Route::post('/real-estate', [RealEstateController::class, 'store'])->name('real-estate.store');
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

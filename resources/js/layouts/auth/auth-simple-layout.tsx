@@ -23,7 +23,7 @@ export default function AuthSimpleLayout({
                 <div className="relative z-10 flex flex-col items-center px-12 text-center">
                     <Link href={home()}>
                         <img
-                            src="/images/housten-logo.svg"
+                            src="/images/housten-logo-1.png"
                             alt="Houston EZ Finance"
                             className="h-28 w-72 object-contain"
                         />
@@ -57,13 +57,13 @@ export default function AuthSimpleLayout({
 
             {/* Right — Form Panel */}
             <div className="flex w-full flex-col items-center justify-center bg-white px-6 py-12 text-gray-900 lg:w-1/2">
-                {/* Mobile logo */}
+                {/* Mobile logo — new brand PNG has white text, render on a dark tile for contrast */}
                 <div className="mb-8 lg:hidden">
-                    <Link href={home()}>
+                    <Link href={home()} className="inline-block rounded-xl bg-[#0b1020] px-6 py-3">
                         <img
-                            src="/images/housten-logo-black.svg"
+                            src="/images/housten-logo-1.png"
                             alt="Houston EZ Finance"
-                            className="h-20 w-52 object-contain"
+                            className="h-16 w-44 object-contain"
                         />
                     </Link>
                 </div>

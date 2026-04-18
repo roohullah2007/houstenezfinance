@@ -29,6 +29,7 @@ class CarListing extends Model
         'transmission',
         'vehicle_type',
         'description',
+        'video_url',
         'images',
         'main_image_index',
         'first_name',

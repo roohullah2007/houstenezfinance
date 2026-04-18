@@ -114,9 +114,9 @@ export default function Locations() {
                         <div className="mx-auto max-w-[1408px] px-4 sm:px-6 lg:px-8">
                             <div className="mb-10">
                                 <p className="text-sm font-semibold tracking-wider uppercase" style={{ color: ACCENT }}>
-                                    All Cities
+                                    All Communities
                                 </p>
-                                <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">All Texas Cities</h2>
+                                <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">All Texas Communities</h2>
                             </div>
                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                                 {texasCities.map((c) => (
@@ -180,7 +180,7 @@ export default function Locations() {
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <img src="/images/housten-logo.svg" alt="Houston EZ Finance" className="h-14 w-auto" />
+                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
                                 <p className="mt-4 text-sm leading-relaxed text-white/60">
                                     Your trusted marketplace for quality vehicles and hassle-free auto financing in Houston and beyond.
                                 </p>
@@ -221,15 +221,15 @@ export default function Locations() {
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
                                     <li className="flex items-start gap-2">
                                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                                        1234 Main St, Houston, TX 77002
+                                        3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        (713) 555-0123
+                                        832-322-2354
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 shrink-0" />
-                                        hello@houstonezfinance.com
+                                        houstonezfinance@gmail.com
                                     </li>
                                 </ul>
                             </div>

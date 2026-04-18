@@ -43,10 +43,10 @@ const bodyTypes = [
 ];
 
 const priceRanges = [
-    { label: 'Under $20k', range: '$0 – $20,000', count: 214 },
-    { label: '$20k – $40k', range: '$20,000 – $40,000', count: 387 },
-    { label: '$40k – $75k', range: '$40,000 – $75,000', count: 256 },
-    { label: '$75k+', range: '$75,000 & Up', count: 142 },
+    { label: 'Under $10K', range: '$0 – $10,000', count: 214, href: '/car-listings?max_price=10000' },
+    { label: '$10K – $15K', range: '$10,000 – $15,000', count: 387, href: '/car-listings?min_price=10000&max_price=15000' },
+    { label: '$20K – $30K', range: '$20,000 – $30,000', count: 256, href: '/car-listings?min_price=20000&max_price=30000' },
+    { label: '$40K+', range: '$40,000 & Up', count: 142, href: '/car-listings?min_price=40000' },
 ];
 
 const fuelTypes = [
@@ -130,7 +130,7 @@ export default function Categories() {
                                 {priceRanges.map((p) => (
                                     <a
                                         key={p.label}
-                                        href="/car-listings"
+                                        href={p.href}
                                         style={{ backgroundColor: '#ffffff' }}
                                         className="group block rounded-2xl border border-gray-200 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-[#F26B5E] hover:shadow-xl"
                                     >
@@ -209,7 +209,7 @@ export default function Categories() {
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
                         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <img src="/images/housten-logo.svg" alt="Houston EZ Finance" className="h-14 w-auto" />
+                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
                                 <p className="mt-4 text-sm leading-relaxed text-white/60">
                                     Your trusted marketplace for quality vehicles and hassle-free auto financing in Houston and beyond.
                                 </p>
@@ -250,15 +250,15 @@ export default function Categories() {
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
                                     <li className="flex items-start gap-2">
                                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                                        1234 Main St, Houston, TX 77002
+                                        3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        (713) 555-0123
+                                        832-322-2354
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 shrink-0" />
-                                        hello@houstonezfinance.com
+                                        houstonezfinance@gmail.com
                                     </li>
                                 </ul>
                             </div>
