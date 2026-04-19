@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Car, LayoutGrid, Mail } from 'lucide-react';
+import { Car, Building2, ClipboardList, FileText, LayoutGrid, Mail } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -20,6 +20,21 @@ const mainNavItems: NavItem[] = [
         title: 'Car Listings',
         href: '/admin/car-listings',
         icon: Car,
+    },
+    {
+        title: 'Real Estate',
+        href: '/admin/real-estate-listings',
+        icon: Building2,
+    },
+    {
+        title: 'Real Estate Content',
+        href: '/admin/real-estate-content',
+        icon: FileText,
+    },
+    {
+        title: 'Finance Applications',
+        href: '/admin/finance-applications',
+        icon: ClipboardList,
     },
     {
         title: 'Contact Messages',

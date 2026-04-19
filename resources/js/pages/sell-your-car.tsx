@@ -194,13 +194,13 @@ export default function SellYourCar() {
                         </div>
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-gray-900">
-                                JUST $0.99 FOR 4 WEEKS <span className="text-sm font-normal text-gray-500">(REG PRICE $4.99)</span>
+                                JUST $5 FOR 4 WEEKS
                             </h2>
                             <p className="mt-1 text-sm text-gray-600">
                                 SELL YOUR CAR THE QUICKEST AND EASY WAY! ONLINE AT HOUSTONEZFINANCE.COM
                             </p>
                             <p className="mt-2 text-xs leading-relaxed text-gray-500">
-                                We charge a small fee of $0.99 to keep the Spammers out and serious Sellers and Buyers in.
+                                We charge a small fee of $5 to keep the Spammers out and serious Sellers and Buyers in.
                                 Why sell your car on Houstonezfinance.com? Your car listing will be seen by hundreds to thousands
                                 of customers looking to finance a car and in most cases will opt out to search for a cash car,
                                 if the price is right. Houstonezfinance.com has sellers with cars in almost every price range
@@ -208,7 +208,7 @@ export default function SellYourCar() {
                             </p>
                         </div>
                         <div className="flex flex-col items-center rounded-xl border-2 border-[#F26B5E] bg-white px-6 py-4 shadow-lg">
-                            <span className="text-3xl font-bold text-[#F26B5E]">$0.99</span>
+                            <span className="text-3xl font-bold text-[#F26B5E]">$5</span>
                             <span className="text-xs font-medium uppercase text-gray-500">4 Weeks</span>
                         </div>
                     </div>
@@ -625,7 +625,7 @@ export default function SellYourCar() {
                                 className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:opacity-50"
                                 style={{ backgroundColor: ACCENT }}
                             >
-                                {processing ? 'Submitting...' : 'Submit Listing — $0.99'}
+                                {processing ? 'Submitting...' : 'Submit Listing — $5'}
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

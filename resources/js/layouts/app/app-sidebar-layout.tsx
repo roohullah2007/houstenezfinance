@@ -4,6 +4,8 @@ import {
     LayoutGrid,
     Mail,
     Home,
+    Building2,
+    FileText,
     Bell,
     ChevronDown,
     LogOut,
@@ -11,6 +13,7 @@ import {
     Menu,
     X,
     MessageSquare,
+    ClipboardList,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { AppLayoutProps } from '@/types';
@@ -20,6 +23,9 @@ const ACCENT = '#F26B5E';
 const navItems = [
     { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutGrid },
     { title: 'Car Listings', href: '/admin/car-listings', icon: Car },
+    { title: 'Real Estate', href: '/admin/real-estate-listings', icon: Building2 },
+    { title: 'Real Estate Content', href: '/admin/real-estate-content', icon: FileText },
+    { title: 'Finance Applications', href: '/admin/finance-applications', icon: ClipboardList },
     { title: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
     { title: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
 ];
