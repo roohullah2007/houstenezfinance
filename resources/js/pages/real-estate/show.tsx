@@ -382,6 +382,9 @@ export default function ShowRealEstate({ listing }: Props) {
                                     <li><Link href="/car-listings" className="transition hover:text-[#F26B5E]">Car Listings</Link></li>
                                     <li><Link href="/real-estate" className="transition hover:text-[#F26B5E]">Real Estate</Link></li>
                                     <li><Link href="/sell-your-car" className="transition hover:text-[#F26B5E]">Sell Your Car</Link></li>
+                                    <li><Link href="/categories" className="transition hover:text-[#F26B5E]">Categories</Link></li>
+                                    <li><Link href="/locations" className="transition hover:text-[#F26B5E]">Locations</Link></li>
+                                    <li><Link href="/dealers" className="transition hover:text-[#F26B5E]">Dealers</Link></li>
                                     <li><Link href="/contact" className="transition hover:text-[#F26B5E]">Contact</Link></li>
                                 </ul>
                             </div>

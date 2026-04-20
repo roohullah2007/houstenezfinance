@@ -228,7 +228,7 @@ export default function Categories() {
                             <div>
                                 <h4 className="text-sm font-semibold tracking-wider uppercase">Quick Links</h4>
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    {['About Us', 'Car Listings', 'Dealers', 'Blog', 'Contact'].map((l) => (
+                                    {['About Us', 'Car Listings', 'Categories', 'Locations', 'Dealers', 'Blog', 'Contact'].map((l) => (
                                         <li key={l}>
                                             <a href="#" className="transition hover:text-[#F26B5E]">{l}</a>
                                         </li>

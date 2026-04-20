@@ -768,7 +768,7 @@ export default function Welcome({
                                     Quick Links
                                 </h4>
                                 <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    {['About Us', 'Car Listings', 'Dealers', 'Blog', 'Contact'].map(
+                                    {['About Us', 'Car Listings', 'Categories', 'Locations', 'Dealers', 'Blog', 'Contact'].map(
                                         (l) => (
                                             <li key={l}>
                                                 <a

@@ -18,15 +18,12 @@ import type { User } from '@/types';
 const ACCENT = '#F26B5E';
 
 const navLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Car Listings', href: '/car-listings' },
-    { label: 'Real Estate', href: '/real-estate' },
-    { label: 'Categories', href: '/categories' },
-    { label: 'Locations', href: '/locations' },
-    { label: 'Dealers', href: '/dealers' },
-    { label: 'Sell Your Car', href: '/sell-your-car' },
-    { label: 'Finance Application', href: '/finance-application' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'HOME', href: '/' },
+    { label: 'INVENTORY', href: '/car-listings' },
+    { label: 'SELL YOUR CAR', href: '/sell-your-car' },
+    { label: 'FINANCING', href: '/finance-application' },
+    { label: 'REAL ESTATE', href: '/real-estate' },
+    { label: 'CONTACT US', href: '/contact' },
 ];
 
 interface PublicHeaderProps {
