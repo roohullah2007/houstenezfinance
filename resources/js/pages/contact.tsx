@@ -158,7 +158,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <label className={labelClass}>Phone Number</label>
-                                        <input type="tel" className={inputClass} placeholder="832-322-2354" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+                                        <input type="tel" className={inputClass} placeholder="Your phone number" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
                                         {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
                                     </div>
                                     <div>

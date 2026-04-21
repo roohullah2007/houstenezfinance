@@ -250,8 +250,8 @@ export default function EditCarListing({ listing }: Props) {
                             <textarea className={`${inputClass} min-h-[100px] resize-y`} value={data.description} onChange={(e) => setData('description', e.target.value)} rows={4} />
                         </div>
                         <div className="sm:col-span-2 lg:col-span-3">
-                            <label className={labelClass}>YouTube Video URL (optional)</label>
-                            <input type="url" className={inputClass} placeholder="https://www.youtube.com/watch?v=..." value={data.video_url} onChange={(e) => setData('video_url', e.target.value)} />
+                            <label className={labelClass}>Video URL (optional)</label>
+                            <input type="url" className={inputClass} placeholder="YouTube or Vimeo URL" value={data.video_url} onChange={(e) => setData('video_url', e.target.value)} />
                             {errors.video_url && <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>}
                         </div>
                     </div>

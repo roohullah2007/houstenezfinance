@@ -81,10 +81,6 @@ export default function FinanceApplication() {
         // Vehicle
         vehicle_of_interest: '', down_payment: '', trade_in_vehicle: '',
 
-        // References
-        reference1_name: '', reference1_phone: '', reference1_relationship: '',
-        reference2_name: '', reference2_phone: '', reference2_relationship: '',
-
         credit_check_authorized: false,
         captcha_token: '', captcha_answer: '', website: '',
     });
@@ -409,42 +405,6 @@ export default function FinanceApplication() {
                             <div className="sm:col-span-2">
                                 <label className={labelClass}>Trade-In Vehicle (year/make/model)</label>
                                 <input type="text" className={inputClass} value={data.trade_in_vehicle} onChange={(e) => setData('trade_in_vehicle', e.target.value)} />
-                            </div>
-                        </div>
-                    </Section>
-
-                    {/* References */}
-                    <Section icon={Phone} title="References" subtitle="Two personal references (not family)">
-                        <div className="grid gap-6 sm:grid-cols-2">
-                            <div className="space-y-3">
-                                <p className="text-sm font-semibold text-gray-700">Reference 1</p>
-                                <div>
-                                    <label className={labelClass}>Full Name</label>
-                                    <input type="text" className={inputClass} value={data.reference1_name} onChange={(e) => setData('reference1_name', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Phone</label>
-                                    <input type="tel" className={inputClass} value={data.reference1_phone} onChange={(e) => setData('reference1_phone', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Relationship</label>
-                                    <input type="text" placeholder="e.g. Coworker, Friend" className={inputClass} value={data.reference1_relationship} onChange={(e) => setData('reference1_relationship', e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <p className="text-sm font-semibold text-gray-700">Reference 2</p>
-                                <div>
-                                    <label className={labelClass}>Full Name</label>
-                                    <input type="text" className={inputClass} value={data.reference2_name} onChange={(e) => setData('reference2_name', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Phone</label>
-                                    <input type="tel" className={inputClass} value={data.reference2_phone} onChange={(e) => setData('reference2_phone', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Relationship</label>
-                                    <input type="text" className={inputClass} value={data.reference2_relationship} onChange={(e) => setData('reference2_relationship', e.target.value)} />
-                                </div>
                             </div>
                         </div>
                     </Section>

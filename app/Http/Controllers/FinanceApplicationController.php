@@ -80,14 +80,6 @@ class FinanceApplicationController extends Controller
             'down_payment' => 'nullable|numeric|min:0',
             'trade_in_vehicle' => 'nullable|string|max:255',
 
-            // References
-            'reference1_name' => 'nullable|string|max:255',
-            'reference1_phone' => 'nullable|string|max:30',
-            'reference1_relationship' => 'nullable|string|max:100',
-            'reference2_name' => 'nullable|string|max:255',
-            'reference2_phone' => 'nullable|string|max:30',
-            'reference2_relationship' => 'nullable|string|max:100',
-
             'credit_check_authorized' => 'accepted',
             'captcha_token' => 'required|string',
             'captcha_answer' => 'required|string',

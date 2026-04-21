@@ -92,7 +92,13 @@ export default function ShowCarListing({ listing }: Props) {
         }
         return null;
     }
+    function getVimeoEmbedId(url: string | null): string | null {
+        if (!url) return null;
+        const m = url.match(/(?:vimeo\.com\/(?:video\/|channels\/[^/]+\/|groups\/[^/]+\/videos\/)?|player\.vimeo\.com\/video\/)(\d+)/);
+        return m ? m[1] : null;
+    }
     const videoId = getYouTubeEmbedId(listing.video_url);
+    const vimeoId = getVimeoEmbedId(listing.video_url);
 
     const details = [
         { icon: Calendar, label: 'Year', value: listing.year },
@@ -220,16 +226,21 @@ export default function ShowCarListing({ listing }: Props) {
                                                 allowFullScreen
                                             />
                                         </div>
+                                    ) : vimeoId ? (
+                                        <div className="aspect-video w-full overflow-hidden rounded-xl">
+                                            <iframe
+                                                src={`https://player.vimeo.com/video/${vimeoId}`}
+                                                title="Vehicle video"
+                                                className="h-full w-full"
+                                                frameBorder={0}
+                                                allow="autoplay; fullscreen; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        </div>
                                     ) : (
-                                        <a
-                                            href={listing.video_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-sm font-medium text-[#F26B5E] hover:underline"
-                                        >
-                                            <Youtube className="h-4 w-4" />
-                                            Watch video
-                                        </a>
+                                        <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                                            <video src={listing.video_url} controls className="h-full w-full" />
+                                        </div>
                                     )}
                                 </div>
                             )}
