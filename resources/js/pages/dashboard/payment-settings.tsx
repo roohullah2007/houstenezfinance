@@ -1,14 +1,14 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { CheckCircle2, CreditCard, Lock, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, CreditCard, Lock, AlertTriangle, XCircle } from 'lucide-react';
 import { type FormEvent } from 'react';
 
 interface Settings {
-    stripe_enabled: boolean;
     stripe_test_mode: boolean;
     stripe_publishable_key: string;
     stripe_secret_key_set: boolean;
     listing_fee: number;
     currency: string;
+    payment_active: boolean;
 }
 
 interface Props {
@@ -22,7 +22,6 @@ export default function PaymentSettings({ settings }: Props) {
     const flash = (usePage().props as { flash?: { success?: string } }).flash;
 
     const { data, setData, put, processing, errors } = useForm({
-        stripe_enabled: settings.stripe_enabled,
         stripe_test_mode: settings.stripe_test_mode,
         stripe_publishable_key: settings.stripe_publishable_key || '',
         stripe_secret_key: '',
@@ -57,6 +56,28 @@ export default function PaymentSettings({ settings }: Props) {
                     </div>
                 )}
 
+                {settings.payment_active ? (
+                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-900">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                        <div>
+                            <p className="font-semibold">Payments are active.</p>
+                            <p className="mt-1">
+                                Private sellers will be charged the listing fee via Stripe after submitting the Sell Your Car form.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                        <div>
+                            <p className="font-semibold">Payments are not active.</p>
+                            <p className="mt-1">
+                                To start charging, make sure the listing fee is above $0 and both Stripe keys below are saved.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
                     <Lock className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
                     <div>
@@ -84,27 +105,17 @@ export default function PaymentSettings({ settings }: Props) {
                             </div>
 
                             <div className="space-y-5">
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
-                                        <input
-                                            type="checkbox"
-                                            checked={data.stripe_enabled}
-                                            onChange={(e) => setData('stripe_enabled', e.target.checked)}
-                                            className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
-                                        />
-                                        <span className="text-sm font-medium text-gray-900">Enable Stripe payments</span>
-                                    </label>
-
-                                    <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
-                                        <input
-                                            type="checkbox"
-                                            checked={data.stripe_test_mode}
-                                            onChange={(e) => setData('stripe_test_mode', e.target.checked)}
-                                            className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
-                                        />
-                                        <span className="text-sm text-gray-700">Test mode</span>
-                                    </label>
-                                </div>
+                                <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.stripe_test_mode}
+                                        onChange={(e) => setData('stripe_test_mode', e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                        Test mode (use <code className="rounded bg-gray-100 px-1">pk_test_…</code> / <code className="rounded bg-gray-100 px-1">sk_test_…</code> keys)
+                                    </span>
+                                </label>
 
                                 <div>
                                     <label className={labelClass}>Publishable Key</label>
@@ -180,7 +191,7 @@ export default function PaymentSettings({ settings }: Props) {
                         </div>
                     </div>
 
-                    {data.stripe_enabled && !data.stripe_test_mode && (
+                    {!data.stripe_test_mode && settings.payment_active && (
                         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
                             <p>

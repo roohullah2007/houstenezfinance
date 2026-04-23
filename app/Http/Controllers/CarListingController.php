@@ -148,11 +148,10 @@ class CarListingController extends Controller
 
     public function create()
     {
-        $stripeEnabled = (bool) SiteSetting::get('stripe_enabled', false);
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
         $publishableKey = SiteSetting::get('stripe_publishable_key');
         $secretKey = SiteSetting::get('stripe_secret_key');
-        $paymentActive = $stripeEnabled && $listingFee > 0 && ! empty($publishableKey) && ! empty($secretKey);
+        $paymentActive = $listingFee > 0 && ! empty($publishableKey) && ! empty($secretKey);
 
         return Inertia::render('sell-your-car', [
             'payment' => [
@@ -216,12 +215,10 @@ class CarListingController extends Controller
         $validated['user_id'] = $request->user()?->id;
         $validated['status'] = 'pending';
 
-        $stripeEnabled = (bool) SiteSetting::get('stripe_enabled', false);
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
         $publishableKey = SiteSetting::get('stripe_publishable_key');
         $secretKey = SiteSetting::get('stripe_secret_key');
-        $paymentRequired = $stripeEnabled
-            && $listingFee > 0
+        $paymentRequired = $listingFee > 0
             && ! empty($publishableKey)
             && ! empty($secretKey);
 
