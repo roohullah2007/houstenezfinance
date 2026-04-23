@@ -50,3 +50,22 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Unregister any lingering service workers and clear Cache Storage.
+// Prevents leftover service workers from earlier dev projects on 127.0.0.1
+// from intercepting fetches and causing ERR_CONNECTION_REFUSED errors.
+// Safe: this app does not ship its own service worker.
+if (typeof window !== 'undefined') {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .getRegistrations()
+            .then((regs) => regs.forEach((r) => r.unregister()))
+            .catch(() => {});
+    }
+    if ('caches' in window) {
+        caches
+            .keys()
+            .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+            .catch(() => {});
+    }
+}
