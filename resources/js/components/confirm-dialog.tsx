@@ -59,7 +59,7 @@ export function ConfirmDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="border-gray-200 bg-white text-gray-900 [color-scheme:light] sm:max-w-md">
                 <DialogHeader>
                     <div className="mb-3 flex items-start gap-4">
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${t.iconWrap}`}>
