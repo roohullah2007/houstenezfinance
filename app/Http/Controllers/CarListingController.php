@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarListing;
+use App\Models\ListingFeature;
 use App\Models\SiteSetting;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
@@ -159,6 +160,10 @@ class CarListingController extends Controller
                 'fee' => $listingFee,
                 'currency' => strtolower((string) SiteSetting::get('currency', 'usd')),
             ],
+            'availableFeatures' => ListingFeature::active()
+                ->ordered()
+                ->pluck('name')
+                ->values(),
         ]);
     }
 
@@ -181,7 +186,8 @@ class CarListingController extends Controller
             'interior_color' => 'required|string|max:50',
             'drive' => 'required|string|max:50',
             'vin' => 'nullable|string|max:17',
-            'features' => 'nullable|string',
+            'features' => 'nullable|array',
+            'features.*' => 'string|max:100',
             'transmission' => 'required|string|max:50',
             'vehicle_type' => 'required|string|max:50',
             'description' => 'nullable|string',
@@ -202,6 +208,10 @@ class CarListingController extends Controller
         }
 
         unset($validated['captcha_token'], $validated['captcha_answer']);
+
+        if (isset($validated['features']) && is_array($validated['features'])) {
+            $validated['features'] = implode(', ', array_values(array_filter($validated['features'], fn($v) => is_string($v) && trim($v) !== '')));
+        }
 
         $imagePaths = [];
         if ($request->hasFile('images')) {

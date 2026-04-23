@@ -89,9 +89,10 @@ interface PaymentInfo {
 
 interface Props {
     payment?: PaymentInfo;
+    availableFeatures?: string[];
 }
 
-export default function SellYourCar({ payment }: Props) {
+export default function SellYourCar({ payment, availableFeatures = [] }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState(false);
@@ -118,7 +119,7 @@ export default function SellYourCar({ payment }: Props) {
         interior_color: '',
         drive: '',
         vin: '',
-        features: '',
+        features: [] as string[],
         transmission: '',
         vehicle_type: '',
         description: '',
@@ -443,14 +444,47 @@ export default function SellYourCar({ payment }: Props) {
 
                                 {/* Features - full width */}
                                 <div className="sm:col-span-2 lg:col-span-3">
-                                    <label className={labelClass}>Features</label>
-                                    <input
-                                        type="text"
-                                        className={inputClass}
-                                        placeholder="Separate with commas (feature1, feature2, etc)"
-                                        value={data.features}
-                                        onChange={(e) => setData('features', e.target.value)}
-                                    />
+                                    <div className="mb-2 flex items-baseline justify-between">
+                                        <label className={labelClass}>Features</label>
+                                        <span className="text-xs text-gray-500">
+                                            {data.features.length} selected
+                                        </span>
+                                    </div>
+                                    {availableFeatures.length === 0 ? (
+                                        <p className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center text-xs text-gray-500">
+                                            No features configured yet. An admin can add them under Listing Features.
+                                        </p>
+                                    ) : (
+                                        <div className="grid gap-2 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {availableFeatures.map((feature) => {
+                                                const checked = data.features.includes(feature);
+                                                return (
+                                                    <label
+                                                        key={feature}
+                                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition ${
+                                                            checked
+                                                                ? 'border-[#F26B5E] bg-[#F26B5E]/5 text-gray-900'
+                                                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={checked}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setData('features', [...data.features, feature]);
+                                                                } else {
+                                                                    setData('features', data.features.filter((f) => f !== feature));
+                                                                }
+                                                            }}
+                                                            className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
+                                                        />
+                                                        <span className="flex-1">{feature}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                     {errors.features && <p className="mt-1 text-xs text-red-500">{errors.features}</p>}
                                 </div>
 

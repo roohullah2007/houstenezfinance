@@ -17,6 +17,7 @@ import {
     CreditCard,
     ExternalLink,
     User as UserIcon,
+    Tag,
 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { AppLayoutProps } from '@/types';
@@ -31,6 +32,7 @@ const navItems = [
     { title: 'Finance Applications', href: '/admin/finance-applications', icon: ClipboardList },
     { title: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
     { title: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
+    { title: 'Listing Features', href: '/admin/listing-features', icon: Tag },
     { title: 'Payment Settings', href: '/admin/payment-settings', icon: CreditCard },
 ];
 

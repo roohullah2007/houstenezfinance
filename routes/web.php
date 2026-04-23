@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinanceApplicationController as AdminFinanceApplicationController;
 use App\Http\Controllers\Admin\InquiryController as AdminInquiryController;
+use App\Http\Controllers\Admin\ListingFeatureController as AdminListingFeatureController;
 use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\RealEstateListingController as AdminRealEstateListingController;
 use App\Http\Controllers\Admin\RealEstatePageContentController as AdminRealEstatePageContentController;
@@ -77,6 +78,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     Route::get('payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
     Route::put('payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
+
+    Route::get('listing-features', [AdminListingFeatureController::class, 'index'])->name('listing-features.index');
+    Route::post('listing-features', [AdminListingFeatureController::class, 'store'])->name('listing-features.store');
+    Route::put('listing-features/{listingFeature}', [AdminListingFeatureController::class, 'update'])->name('listing-features.update');
+    Route::delete('listing-features/{listingFeature}', [AdminListingFeatureController::class, 'destroy'])->name('listing-features.destroy');
 
     Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
