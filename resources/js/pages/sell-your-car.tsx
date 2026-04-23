@@ -477,7 +477,7 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                                                                     setData('features', data.features.filter((f) => f !== feature));
                                                                 }
                                                             }}
-                                                            className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
+                                                            className="h-4 w-4 accent-[#F26B5E] focus:outline-none focus:ring-2 focus:ring-[#F26B5E]/40"
                                                         />
                                                         <span className="flex-1">{feature}</span>
                                                     </label>

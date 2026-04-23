@@ -110,7 +110,7 @@ export default function PaymentSettings({ settings }: Props) {
                                         type="checkbox"
                                         checked={data.stripe_test_mode}
                                         onChange={(e) => setData('stripe_test_mode', e.target.checked)}
-                                        className="h-4 w-4 rounded border-gray-300 text-[#F26B5E] focus:ring-[#F26B5E]"
+                                        className="h-4 w-4 accent-[#F26B5E] focus:outline-none focus:ring-2 focus:ring-[#F26B5E]/40"
                                     />
                                     <span className="text-sm text-gray-700">
                                         Test mode (use <code className="rounded bg-gray-100 px-1">pk_test_…</code> / <code className="rounded bg-gray-100 px-1">sk_test_…</code> keys)
