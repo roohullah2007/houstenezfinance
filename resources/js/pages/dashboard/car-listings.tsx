@@ -14,6 +14,9 @@ import {
     Pencil,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
+
+type ActionKind = 'approve' | 'reject' | 'delete';
 
 interface CarListing {
     id: number;
@@ -65,6 +68,8 @@ const STATUS_ICONS = {
 export default function CarListings({ listings, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
+    const [pending, setPending] = useState<{ kind: ActionKind; id: number } | null>(null);
+    const [processing, setProcessing] = useState(false);
 
     function applyFilters(overrides: Record<string, string> = {}) {
         const params: Record<string, string> = {
@@ -79,20 +84,30 @@ export default function CarListings({ listings, filters }: Props) {
     }
 
     function handleApprove(id: number) {
-        if (confirm('Approve this listing?')) {
-            router.patch(`/admin/car-listings/${id}/approve`);
-        }
+        setPending({ kind: 'approve', id });
     }
 
     function handleReject(id: number) {
-        if (confirm('Reject this listing?')) {
-            router.patch(`/admin/car-listings/${id}/reject`);
-        }
+        setPending({ kind: 'reject', id });
     }
 
     function handleDelete(id: number) {
-        if (confirm('Are you sure you want to delete this listing? This cannot be undone.')) {
-            router.delete(`/admin/car-listings/${id}`);
+        setPending({ kind: 'delete', id });
+    }
+
+    function runPending() {
+        if (!pending) return;
+        setProcessing(true);
+        const done = () => {
+            setProcessing(false);
+            setPending(null);
+        };
+        if (pending.kind === 'approve') {
+            router.patch(`/admin/car-listings/${pending.id}/approve`, {}, { onFinish: done });
+        } else if (pending.kind === 'reject') {
+            router.patch(`/admin/car-listings/${pending.id}/reject`, {}, { onFinish: done });
+        } else {
+            router.delete(`/admin/car-listings/${pending.id}`, { onFinish: done });
         }
     }
 
@@ -311,6 +326,31 @@ export default function CarListings({ listings, filters }: Props) {
                     )}
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={!!pending}
+                onOpenChange={(o) => !o && !processing && setPending(null)}
+                loading={processing}
+                tone={pending?.kind === 'approve' ? 'success' : 'danger'}
+                title={
+                    pending?.kind === 'approve'
+                        ? 'Approve this listing?'
+                        : pending?.kind === 'reject'
+                            ? 'Reject this listing?'
+                            : 'Delete this listing?'
+                }
+                description={
+                    pending?.kind === 'approve'
+                        ? "It will become visible to buyers on the public car listings page."
+                        : pending?.kind === 'reject'
+                            ? 'It will be marked rejected and hidden from the public site. You can restore it later by editing the status.'
+                            : 'This permanently removes the listing and its images. This action cannot be undone.'
+                }
+                confirmLabel={
+                    pending?.kind === 'approve' ? 'Approve' : pending?.kind === 'reject' ? 'Reject' : 'Delete'
+                }
+                onConfirm={runPending}
+            />
         </>
     );
 }

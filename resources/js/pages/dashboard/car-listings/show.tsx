@@ -19,6 +19,9 @@ import {
     DollarSign,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
+
+type ActionKind = 'approve' | 'reject' | 'delete';
 
 interface CarListing {
     id: number;
@@ -61,23 +64,35 @@ const STATUS_STYLES = {
 
 export default function ShowCarListing({ listing }: Props) {
     const [selectedImage, setSelectedImage] = useState(listing.main_image_index ?? 0);
+    const [pending, setPending] = useState<ActionKind | null>(null);
+    const [processing, setProcessing] = useState(false);
     const status = STATUS_STYLES[listing.status];
 
     function handleApprove() {
-        if (confirm('Approve this listing?')) {
-            router.patch(`/admin/car-listings/${listing.id}/approve`);
-        }
+        setPending('approve');
     }
 
     function handleReject() {
-        if (confirm('Reject this listing?')) {
-            router.patch(`/admin/car-listings/${listing.id}/reject`);
-        }
+        setPending('reject');
     }
 
     function handleDelete() {
-        if (confirm('Permanently delete this listing? This cannot be undone.')) {
-            router.delete(`/admin/car-listings/${listing.id}`);
+        setPending('delete');
+    }
+
+    function runPending() {
+        if (!pending) return;
+        setProcessing(true);
+        const done = () => {
+            setProcessing(false);
+            setPending(null);
+        };
+        if (pending === 'approve') {
+            router.patch(`/admin/car-listings/${listing.id}/approve`, {}, { onFinish: done });
+        } else if (pending === 'reject') {
+            router.patch(`/admin/car-listings/${listing.id}/reject`, {}, { onFinish: done });
+        } else {
+            router.delete(`/admin/car-listings/${listing.id}`, { onFinish: done });
         }
     }
 
@@ -281,6 +296,29 @@ export default function ShowCarListing({ listing }: Props) {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={pending !== null}
+                onOpenChange={(o) => !o && !processing && setPending(null)}
+                loading={processing}
+                tone={pending === 'approve' ? 'success' : 'danger'}
+                title={
+                    pending === 'approve'
+                        ? 'Approve this listing?'
+                        : pending === 'reject'
+                            ? 'Reject this listing?'
+                            : 'Delete this listing?'
+                }
+                description={
+                    pending === 'approve'
+                        ? "It will become visible to buyers on the public car listings page."
+                        : pending === 'reject'
+                            ? 'It will be marked rejected and hidden from the public site. You can restore it later by editing the status.'
+                            : 'This permanently removes the listing and its images. This action cannot be undone.'
+                }
+                confirmLabel={pending === 'approve' ? 'Approve' : pending === 'reject' ? 'Reject' : 'Delete'}
+                onConfirm={runPending}
+            />
         </>
     );
 }
