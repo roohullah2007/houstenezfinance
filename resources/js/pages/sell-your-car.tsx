@@ -461,10 +461,10 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                                                 return (
                                                     <label
                                                         key={feature}
-                                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border bg-white px-3 py-2 text-sm text-gray-700 transition ${
+                                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition ${
                                                             checked
-                                                                ? 'border-[#F26B5E] text-gray-900'
-                                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                                ? 'border-gray-300 bg-gray-50 text-gray-900'
+                                                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                                                         }`}
                                                     >
                                                         <input
