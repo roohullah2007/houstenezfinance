@@ -19,6 +19,8 @@ import {
     Send,
     CheckCircle2,
     Youtube,
+    Check,
+    Minus,
 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
@@ -54,9 +56,10 @@ interface CarListing {
 
 interface Props {
     listing: CarListing;
+    availableFeatures?: string[];
 }
 
-export default function ShowCarListing({ listing }: Props) {
+export default function ShowCarListing({ listing, availableFeatures = [] }: Props) {
     const [selectedImage, setSelectedImage] = useState(listing.main_image_index ?? 0);
     const [submitted, setSubmitted] = useState(false);
 
@@ -253,19 +256,56 @@ export default function ShowCarListing({ listing }: Props) {
                                 </div>
                             )}
 
-                            {/* Features */}
-                            {listing.features && (
-                                <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                                    <h3 className="mb-3 text-lg font-semibold text-gray-900">Features</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {listing.features.split(',').map((f, i) => (
-                                            <span key={i} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                                                {f.trim()}
+                            {/* Features — show full catalog, with check/uncheck per feature */}
+                            {(availableFeatures.length > 0 || listing.features) && (() => {
+                                const selected = new Set(
+                                    (listing.features ?? '')
+                                        .split(',')
+                                        .map((s) => s.trim())
+                                        .filter(Boolean),
+                                );
+                                const rows = availableFeatures.length > 0 ? availableFeatures : Array.from(selected);
+                                // If there are custom-typed features not in the catalog, append them so nothing is lost.
+                                const catalogSet = new Set(availableFeatures);
+                                const extras = Array.from(selected).filter((f) => !catalogSet.has(f));
+                                const allRows = [...rows, ...extras];
+                                const selectedCount = selected.size;
+
+                                return (
+                                    <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                                        <div className="mb-4 flex items-baseline justify-between">
+                                            <h3 className="text-lg font-semibold text-gray-900">Features</h3>
+                                            <span className="text-xs font-medium text-gray-500">
+                                                {selectedCount} of {allRows.length}
                                             </span>
-                                        ))}
+                                        </div>
+                                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                            {allRows.map((feature) => {
+                                                const has = selected.has(feature);
+                                                return (
+                                                    <div
+                                                        key={feature}
+                                                        className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm ${
+                                                            has
+                                                                ? 'border-[#F26B5E]/30 bg-[#F26B5E]/5 text-gray-900'
+                                                                : 'border-gray-100 bg-white text-gray-400'
+                                                        }`}
+                                                    >
+                                                        <span
+                                                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                                                                has ? 'bg-[#F26B5E] text-white' : 'bg-gray-100 text-gray-300'
+                                                            }`}
+                                                        >
+                                                            {has ? <Check className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                                                        </span>
+                                                        <span className={has ? 'font-medium' : ''}>{feature}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </div>
 
                         {/* Right — Price, Details, Contact */}

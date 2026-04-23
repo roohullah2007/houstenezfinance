@@ -144,6 +144,10 @@ class CarListingController extends Controller
 
         return Inertia::render('car-listings/show', [
             'listing' => $carListing,
+            'availableFeatures' => ListingFeature::active()
+                ->ordered()
+                ->pluck('name')
+                ->values(),
         ]);
     }
 
