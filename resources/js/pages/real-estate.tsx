@@ -16,6 +16,12 @@ import {
     Heart,
     Maximize2,
     Info,
+    Key,
+    DollarSign,
+    Building2,
+    ShieldCheck,
+    Sparkles,
+    Award,
 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
@@ -150,11 +156,19 @@ export default function RealEstate({ listings, filters, content }: Props) {
                 </div>
 
                 {/* Listings Grid */}
-                <section className="mx-auto max-w-[1408px] px-4 py-10 sm:px-6 lg:px-8">
-                    <div className="mb-6 flex items-baseline justify-between">
-                        <h2 className="text-xl font-bold text-slate-900">
-                            Featured Properties
-                        </h2>
+                <section className="mx-auto max-w-[1408px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+                    <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div className="mb-2 flex items-center gap-2">
+                                <span className="h-0.5 w-8" style={{ backgroundColor: ACCENT }} />
+                                <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: ACCENT }}>
+                                    Available Now
+                                </p>
+                            </div>
+                            <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                                Featured Properties
+                            </h2>
+                        </div>
                         <p className="text-sm text-slate-500">
                             {listings.total} {listings.total === 1 ? 'result' : 'results'}
                         </p>
@@ -265,93 +279,170 @@ export default function RealEstate({ listings, filters, content }: Props) {
                     )}
                 </section>
 
-                {/* Editable Content + Contact Form */}
-                <section id="contact" className="bg-white py-14">
-                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                        <div className="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-sm sm:p-8">
-                            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-                                {content.heading}
-                            </h2>
-                            {content.body && (
-                                <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-600">
-                                    {content.body}
-                                </p>
-                            )}
+                {/* Unified Intro + Contact Form */}
+                <section id="contact" className="relative overflow-hidden bg-white py-20 sm:py-24">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+                    <div className="pointer-events-none absolute -top-40 right-0 h-[480px] w-[480px] rounded-full opacity-[0.09] blur-3xl" style={{ background: ACCENT }} />
+                    <div className="pointer-events-none absolute -bottom-40 left-0 h-[400px] w-[400px] rounded-full bg-indigo-500/5 blur-3xl" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.055)_1px,transparent_0)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]" />
+
+                    <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-center gap-3">
+                            <span className="h-px w-10" style={{ backgroundColor: ACCENT }} />
+                            <p className="text-xs font-semibold tracking-[0.22em] uppercase" style={{ color: ACCENT }}>
+                                Your Home Buying Partner
+                            </p>
+                            <span className="h-px w-10" style={{ backgroundColor: ACCENT }} />
                         </div>
 
-                        {(content.secondary_heading || content.secondary_body) && (
-                            <div className="mb-10 rounded-2xl border-2 p-6 shadow-sm sm:p-8" style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}08` }}>
-                                {content.secondary_heading && (
-                                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-                                        {content.secondary_heading}
-                                    </h2>
-                                )}
-                                {content.secondary_body && (
-                                    <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-600">
-                                        {content.secondary_body}
-                                    </p>
-                                )}
-                            </div>
-                        )}
+                        <h2 className="mt-6 text-center text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                            We Make Homeownership a{' '}
+                            <span className="relative inline-block">
+                                <span className="relative z-10" style={{ color: ACCENT }}>Simple and EZ</span>
+                                <span className="absolute inset-x-0 bottom-1.5 h-3 -z-0 rounded" style={{ backgroundColor: `${ACCENT}22` }} />
+                            </span>{' '}
+                            Process!
+                        </h2>
 
-                        <div className="mb-8 text-center">
-                            <p className="text-sm font-semibold tracking-wider uppercase" style={{ color: ACCENT }}>
-                                Get in Touch
-                            </p>
-                            <h3 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Interested? Send us a message</h3>
-                            <p className="mt-2 text-base text-gray-500">
-                                Tell us which home or community caught your eye and we'll follow up with more details.
-                            </p>
+                        <p className="mx-auto mt-6 max-w-3xl text-center text-base leading-relaxed text-gray-600 sm:text-lg">
+                            From First Time Home Buyers Programs, Down Payment Assistance and First Time Buyer Grants, we do our best to make your Home Buying Experience <span className="font-semibold text-gray-900">EZ and Stress Free</span>!
+                        </p>
+
+                        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {[
+                                { Icon: Key, title: 'First-Time Buyer Programs', body: 'Special pathways for first-time homeowners' },
+                                { Icon: DollarSign, title: 'Down Payment Assistance', body: 'Grants that help you close the gap' },
+                                { Icon: Award, title: 'First-Time Buyer Grants', body: 'Real money toward your new home' },
+                                { Icon: Building2, title: 'In-House Financing', body: 'Often more affordable than a bank loan' },
+                            ].map(({ Icon, title, body }) => (
+                                <div key={title} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-transparent hover:shadow-xl">
+                                    <div className="pointer-events-none absolute inset-x-0 -top-16 h-16 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-60" style={{ background: ACCENT }} />
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl transition duration-300 group-hover:scale-110" style={{ backgroundColor: `${ACCENT}15` }}>
+                                        <Icon className="h-5 w-5" style={{ color: ACCENT }} />
+                                    </div>
+                                    <p className="mt-5 text-base font-semibold text-gray-900">{title}</p>
+                                    <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{body}</p>
+                                </div>
+                            ))}
                         </div>
 
-                        {submitted && (
-                            <div className="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-6 py-4">
-                                <CheckCircle2 className="h-6 w-6 text-green-600" />
-                                <div>
-                                    <p className="font-semibold text-green-800">Message Sent!</p>
-                                    <p className="text-sm text-green-600">We'll reach out within 24 hours.</p>
+                        <div className="mt-6 rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm sm:p-7">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${ACCENT}15` }}>
+                                        <MapPin className="h-4 w-4" style={{ color: ACCENT }} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-semibold tracking-[0.18em] uppercase text-gray-500">Proudly Serving</p>
+                                        <p className="text-sm text-gray-700">Houston &amp; surrounding counties</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 sm:justify-end">
+                                    {['Houston', 'Harris County', 'Fort Bend County', 'Cypress', 'Katy', '& More'].map((area) => (
+                                        <span key={area} className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-300">
+                                            {area}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
-                        )}
+                        </div>
 
-                        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-                            <div className="grid gap-5 sm:grid-cols-2">
-                                <div>
-                                    <label className={labelClass}>Your Name</label>
-                                    <input type="text" className={inputClass} placeholder="John Doe" value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                                    {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                        {/* 2-col: eligibility + form */}
+                        <div className="mt-6 grid gap-6 lg:grid-cols-5">
+                            <div className="flex flex-col gap-6 lg:col-span-2">
+                                <div className="overflow-hidden rounded-2xl border p-6 shadow-sm sm:p-7" style={{ borderColor: `${ACCENT}30`, backgroundColor: `${ACCENT}08` }}>
+                                    <div className="flex flex-col gap-5">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl shadow-md" style={{ backgroundColor: ACCENT }}>
+                                            <ShieldCheck className="h-6 w-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: ACCENT }}>
+                                                Special Assistance Available
+                                            </p>
+                                            <p className="mt-2 text-base leading-relaxed text-gray-700">
+                                                <span className="font-semibold text-gray-900">Government, VA or State Employees</span> — there are many assistance programs that just opened up that you may qualify for! We are your <span className="font-semibold text-gray-900">first stop before you hire a Realtor</span>. Let our Licensed professionals and New Home Builders make the process EZ!
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className={labelClass}>Phone Number</label>
-                                    <input type="tel" className={inputClass} placeholder="832-322-2354" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
-                                    {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <label className={labelClass}>Email Address</label>
-                                    <input type="email" className={inputClass} placeholder="john@example.com" value={data.email} onChange={(e) => setData('email', e.target.value)} />
-                                    {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <label className={labelClass}>Comment / Message</label>
-                                    <textarea className={`${inputClass} min-h-[150px] resize-y`} placeholder="Tell us which home or community you're interested in..." value={data.message} onChange={(e) => setData('message', e.target.value)} rows={6} />
-                                    {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <CaptchaField data={data} setData={setData} errors={errors} />
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:opacity-50 sm:w-auto"
-                                        style={{ backgroundColor: ACCENT }}
-                                    >
-                                        {processing ? 'Sending...' : 'Send Message'}
-                                        <Send className="h-4 w-4" />
-                                    </button>
+
+                                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0b1020] via-[#111834] to-[#0b1020] p-6 text-white shadow-lg sm:p-7">
+                                    <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-30 blur-2xl" style={{ background: ACCENT }} />
+                                    <div className="relative flex items-start gap-3">
+                                        <Sparkles className="mt-0.5 h-5 w-5 shrink-0" style={{ color: ACCENT }} />
+                                        <div>
+                                            <p className="text-base font-semibold">You may be eligible for more than you thought!</p>
+                                            <p className="mt-1.5 text-sm text-white/70">Simply fill out the contact us form to get the process started!</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+
+                            <div className="lg:col-span-3">
+                                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8">
+                                    <div className="mb-6">
+                                        <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: ACCENT }}>
+                                            Get in Touch
+                                        </p>
+                                        <h3 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                                            Interested? Send us a message
+                                        </h3>
+                                        <p className="mt-2 text-base text-gray-500">
+                                            Tell us which home or community caught your eye and we'll follow up with more details.
+                                        </p>
+                                    </div>
+
+                                    {submitted && (
+                                        <div className="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-6 py-4">
+                                            <CheckCircle2 className="h-6 w-6 text-green-600" />
+                                            <div>
+                                                <p className="font-semibold text-green-800">Message Sent!</p>
+                                                <p className="text-sm text-green-600">We'll reach out within 24 hours.</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleSubmit}>
+                                        <div className="grid gap-5 sm:grid-cols-2">
+                                            <div>
+                                                <label className={labelClass}>Your Name</label>
+                                                <input type="text" className={inputClass} placeholder="John Doe" value={data.name} onChange={(e) => setData('name', e.target.value)} />
+                                                {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Phone Number</label>
+                                                <input type="tel" className={inputClass} placeholder="832-322-2354" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+                                                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <label className={labelClass}>Email Address</label>
+                                                <input type="email" className={inputClass} placeholder="john@example.com" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                                                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <label className={labelClass}>Comment / Message</label>
+                                                <textarea className={`${inputClass} min-h-[150px] resize-y`} placeholder="Tell us which home or community you're interested in..." value={data.message} onChange={(e) => setData('message', e.target.value)} rows={6} />
+                                                {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <CaptchaField data={data} setData={setData} errors={errors} />
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <button
+                                                    type="submit"
+                                                    disabled={processing}
+                                                    className="group inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl hover:brightness-110 disabled:opacity-50 sm:w-auto"
+                                                    style={{ backgroundColor: ACCENT }}
+                                                >
+                                                    {processing ? 'Sending...' : 'Send Message'}
+                                                    <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarListing;
+use App\Models\SiteSetting;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -146,7 +148,19 @@ class CarListingController extends Controller
 
     public function create()
     {
-        return Inertia::render('sell-your-car');
+        $stripeEnabled = (bool) SiteSetting::get('stripe_enabled', false);
+        $listingFee = (float) SiteSetting::get('listing_fee', 0);
+        $publishableKey = SiteSetting::get('stripe_publishable_key');
+        $secretKey = SiteSetting::get('stripe_secret_key');
+        $paymentActive = $stripeEnabled && $listingFee > 0 && ! empty($publishableKey) && ! empty($secretKey);
+
+        return Inertia::render('sell-your-car', [
+            'payment' => [
+                'active' => $paymentActive,
+                'fee' => $listingFee,
+                'currency' => strtolower((string) SiteSetting::get('currency', 'usd')),
+            ],
+        ]);
     }
 
     public function store(Request $request)
@@ -202,8 +216,27 @@ class CarListingController extends Controller
         $validated['user_id'] = $request->user()?->id;
         $validated['status'] = 'pending';
 
-        CarListing::create($validated);
+        $stripeEnabled = (bool) SiteSetting::get('stripe_enabled', false);
+        $listingFee = (float) SiteSetting::get('listing_fee', 0);
+        $publishableKey = SiteSetting::get('stripe_publishable_key');
+        $secretKey = SiteSetting::get('stripe_secret_key');
+        $paymentRequired = $stripeEnabled
+            && $listingFee > 0
+            && ! empty($publishableKey)
+            && ! empty($secretKey);
 
-        return redirect()->route('sell-your-car')->with('success', 'Your listing has been submitted for review!');
+        if ($paymentRequired) {
+            $validated['payment_token'] = Str::random(48);
+            $validated['payment_status'] = 'pending';
+            $validated['payment_amount'] = $listingFee;
+        }
+
+        $listing = CarListing::create($validated);
+
+        if ($paymentRequired) {
+            return redirect()->route('sell-your-car.payment', ['token' => $listing->payment_token]);
+        }
+
+        return redirect()->route('sell-your-car.thank-you');
     }
 }

@@ -81,10 +81,29 @@ const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 
 const selectClass = 'w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition focus:border-[#F26B5E] focus:outline-none focus:ring-2 focus:ring-[#F26B5E]/20';
 const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
 
-export default function SellYourCar() {
+interface PaymentInfo {
+    active: boolean;
+    fee: number;
+    currency: string;
+}
+
+interface Props {
+    payment?: PaymentInfo;
+}
+
+export default function SellYourCar({ payment }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState(false);
+
+    const paymentActive = !!payment?.active;
+    const feeAmount = payment?.fee ?? 0;
+    const feeCurrency = (payment?.currency ?? 'usd').toUpperCase();
+    const formattedFee = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: feeCurrency,
+        minimumFractionDigits: feeAmount % 1 === 0 ? 0 : 2,
+    }).format(feeAmount);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
@@ -187,32 +206,33 @@ export default function SellYourCar() {
                 </div>
 
                 {/* Pricing Banner */}
-                <div className="border-b border-[#F26B5E]/20 bg-gradient-to-r from-[#F26B5E]/10 via-[#F26B5E]/5 to-[#F26B5E]/10">
-                    <div className="mx-auto flex max-w-[1408px] flex-col items-center gap-4 px-4 py-8 text-center sm:px-6 lg:flex-row lg:px-8 lg:text-left">
-                        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#F26B5E]/20">
-                            <DollarSign className="h-7 w-7 text-[#F26B5E]" />
-                        </div>
-                        <div className="flex-1">
-                            <h2 className="text-xl font-bold text-gray-900">
-                                JUST $5 FOR 4 WEEKS
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-600">
-                                SELL YOUR CAR THE QUICKEST AND EASY WAY! ONLINE AT HOUSTONEZFINANCE.COM
-                            </p>
-                            <p className="mt-2 text-xs leading-relaxed text-gray-500">
-                                We charge a small fee of $5 to keep the Spammers out and serious Sellers and Buyers in.
-                                Why sell your car on Houstonezfinance.com? Your car listing will be seen by hundreds to thousands
-                                of customers looking to finance a car and in most cases will opt out to search for a cash car,
-                                if the price is right. Houstonezfinance.com has sellers with cars in almost every price range
-                                and that's where your posting comes in.
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center rounded-xl border-2 border-[#F26B5E] bg-white px-6 py-4 shadow-lg">
-                            <span className="text-3xl font-bold text-[#F26B5E]">$5</span>
-                            <span className="text-xs font-medium uppercase text-gray-500">4 Weeks</span>
+                {paymentActive && (
+                    <div className="border-b border-[#F26B5E]/20 bg-gradient-to-r from-[#F26B5E]/10 via-[#F26B5E]/5 to-[#F26B5E]/10">
+                        <div className="mx-auto flex max-w-[1408px] flex-col items-center gap-4 px-4 py-8 text-center sm:px-6 lg:flex-row lg:px-8 lg:text-left">
+                            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#F26B5E]/20">
+                                <DollarSign className="h-7 w-7 text-[#F26B5E]" />
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-xl font-bold uppercase text-gray-900">
+                                    Just {formattedFee} to List Your Car
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-600">
+                                    Sell your car the quickest and easy way — online at HoustonEZFinance.com.
+                                </p>
+                                <p className="mt-2 text-xs leading-relaxed text-gray-500">
+                                    We charge a small fee of {formattedFee} to keep spammers out and serious sellers and buyers in.
+                                    Your listing will be seen by hundreds to thousands of customers. After you submit the form below,
+                                    you'll be taken to a secure Stripe checkout to complete payment — card details are handled by
+                                    Stripe and never stored on our servers.
+                                </p>
+                            </div>
+                            <div className="flex flex-col items-center rounded-xl border-2 border-[#F26B5E] bg-white px-6 py-4 shadow-lg">
+                                <span className="text-3xl font-bold text-[#F26B5E]">{formattedFee}</span>
+                                <span className="text-xs font-medium uppercase text-gray-500">Listing Fee</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Success Message */}
                 {submitted && (
@@ -616,8 +636,14 @@ export default function SellYourCar() {
                         {/* Submit */}
                         <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between sm:p-8">
                             <div className="text-center sm:text-left">
-                                <p className="text-sm font-medium text-gray-900">Ready to list your vehicle?</p>
-                                <p className="text-xs text-gray-500">Your listing will be reviewed and published within 24 hours.</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                    {paymentActive ? 'Review details, then continue to payment' : 'Ready to list your vehicle?'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {paymentActive
+                                        ? `A ${formattedFee} listing fee will be collected via Stripe on the next step.`
+                                        : 'Your listing will be reviewed and published within 24 hours.'}
+                                </p>
                             </div>
                             <button
                                 type="submit"
@@ -625,7 +651,7 @@ export default function SellYourCar() {
                                 className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 disabled:opacity-50"
                                 style={{ backgroundColor: ACCENT }}
                             >
-                                {processing ? 'Submitting...' : 'Submit Listing — $5'}
+                                {processing ? 'Submitting...' : paymentActive ? `Continue to Payment — ${formattedFee}` : 'Submit Listing'}
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

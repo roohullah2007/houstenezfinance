@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinanceApplicationController as AdminFinanceApplicationController;
 use App\Http\Controllers\Admin\InquiryController as AdminInquiryController;
+use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\RealEstateListingController as AdminRealEstateListingController;
 use App\Http\Controllers\Admin\RealEstatePageContentController as AdminRealEstatePageContentController;
 use App\Http\Controllers\CarListingController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\FinanceApplicationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\RealEstateController;
+use App\Http\Controllers\SellYourCarPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -27,6 +29,10 @@ Route::inertia('/dealers', 'dealers')->name('dealers');
 
 Route::get('/sell-your-car', [CarListingController::class, 'create'])->name('sell-your-car');
 Route::post('/sell-your-car', [CarListingController::class, 'store'])->name('sell-your-car.store');
+Route::get('/sell-your-car/thank-you', [SellYourCarPaymentController::class, 'thankYou'])->name('sell-your-car.thank-you');
+Route::get('/sell-your-car/payment/{token}', [SellYourCarPaymentController::class, 'show'])->name('sell-your-car.payment');
+Route::post('/sell-your-car/payment/{token}/intent', [SellYourCarPaymentController::class, 'createIntent'])->name('sell-your-car.payment.intent');
+Route::get('/sell-your-car/payment/{token}/confirm', [SellYourCarPaymentController::class, 'confirm'])->name('sell-your-car.payment.confirm');
 
 Route::get('/contact', [ContactController::class, 'create'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
@@ -68,6 +74,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('finance-applications/{financeApplication}', [AdminFinanceApplicationController::class, 'show'])->name('finance-applications.show');
     Route::patch('finance-applications/{financeApplication}/status', [AdminFinanceApplicationController::class, 'updateStatus'])->name('finance-applications.update-status');
     Route::delete('finance-applications/{financeApplication}', [AdminFinanceApplicationController::class, 'destroy'])->name('finance-applications.destroy');
+
+    Route::get('payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
+    Route::put('payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
 
     Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');

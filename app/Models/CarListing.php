@@ -37,6 +37,11 @@ class CarListing extends Model
         'email',
         'phone',
         'status',
+        'payment_token',
+        'payment_status',
+        'stripe_payment_intent_id',
+        'payment_amount',
+        'paid_at',
     ];
 
     protected function casts(): array
@@ -47,6 +52,8 @@ class CarListing extends Model
             'year' => 'integer',
             'miles' => 'integer',
             'main_image_index' => 'integer',
+            'payment_amount' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 

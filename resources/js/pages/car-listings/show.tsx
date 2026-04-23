@@ -366,6 +366,13 @@ export default function ShowCarListing({ listing }: Props) {
                     </div>
                 </div>
 
+                {/* Legal Disclaimer */}
+                <div className="mx-auto max-w-[1408px] px-4 pb-10 sm:px-6 lg:px-8">
+                    <p className="mx-auto max-w-5xl text-center text-[11px] leading-relaxed text-gray-500">
+                        All Prices Listed are Cash Prices. Information deemed reliable but not Guaranteed. Subject to change without notice. All advertised prices exclude government fees and taxes, any finance charges, any dealer document preparation charge, and any emission testing charge. The price for listed vehicles as equipped does not include charges such as: License, Title, Registration Fees, State or Local Taxes, Dealer Prep, Smog Fees. DEALER makes no representations, expressed or implied, to any actual or prospective purchaser or owner of this vehicle as to the existence, ownership, accuracy, description or condition of the listed vehicle's equipment, accessories, price, specials or any warranties. Any and all differences must be addressed prior to the sale of this vehicle.
+                    </p>
+                </div>
+
                 {/* Footer */}
                 <footer className="bg-[#0b1020] text-white">
                     <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">

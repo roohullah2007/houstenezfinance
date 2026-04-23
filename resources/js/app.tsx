@@ -19,6 +19,8 @@ createInertiaApp({
             case name === 'locations':
             case name === 'dealers':
             case name === 'sell-your-car':
+            case name === 'sell-your-car/payment':
+            case name === 'sell-your-car/thank-you':
             case name === 'contact':
             case name === 'real-estate':
             case name === 'real-estate/show':

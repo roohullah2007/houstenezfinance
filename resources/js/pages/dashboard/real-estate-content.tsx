@@ -92,7 +92,7 @@ export default function RealEstateContent({ content }: Props) {
                                 <input
                                     type="text"
                                     className={inputClass}
-                                    placeholder="e.g., Trusted Dealer Network"
+                                    placeholder="Optional section heading"
                                     value={data.secondary_heading}
                                     onChange={(e) => setData('secondary_heading', e.target.value)}
                                 />

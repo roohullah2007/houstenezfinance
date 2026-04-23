@@ -14,8 +14,11 @@ import {
     X,
     MessageSquare,
     ClipboardList,
+    CreditCard,
+    ExternalLink,
+    User as UserIcon,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { AppLayoutProps } from '@/types';
 
 const ACCENT = '#F26B5E';
@@ -28,6 +31,7 @@ const navItems = [
     { title: 'Finance Applications', href: '/admin/finance-applications', icon: ClipboardList },
     { title: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
     { title: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
+    { title: 'Payment Settings', href: '/admin/payment-settings', icon: CreditCard },
 ];
 
 function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -118,7 +122,27 @@ function AdminHeader({
     onMenuToggle: () => void;
 }) {
     const { auth } = usePage().props;
-    const user = (auth as { user?: { name?: string } })?.user;
+    const user = (auth as { user?: { name?: string; email?: string } })?.user;
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        function handleClick(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMenuOpen(false);
+            }
+        }
+        function handleEsc(e: KeyboardEvent) {
+            if (e.key === 'Escape') setMenuOpen(false);
+        }
+        document.addEventListener('mousedown', handleClick);
+        document.addEventListener('keydown', handleEsc);
+        return () => {
+            document.removeEventListener('mousedown', handleClick);
+            document.removeEventListener('keydown', handleEsc);
+        };
+    }, [menuOpen]);
 
     return (
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
@@ -147,14 +171,76 @@ function AdminHeader({
                             style={{ backgroundColor: ACCENT }}
                         />
                     </button>
-                    <div className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
-                        <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                            style={{ backgroundColor: ACCENT }}
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            type="button"
+                            aria-haspopup="menu"
+                            aria-expanded={menuOpen}
+                            onClick={() => setMenuOpen((v) => !v)}
+                            className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100"
                         >
-                            {user?.name?.charAt(0)?.toUpperCase() || 'A'}
-                        </div>
-                        <ChevronDown className="w-4 h-4 text-gray-500" />
+                            <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                                style={{ backgroundColor: ACCENT }}
+                            >
+                                {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                            </div>
+                            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {menuOpen && (
+                            <div
+                                role="menu"
+                                className="absolute right-0 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5"
+                            >
+                                <div className="border-b border-gray-100 px-4 py-3">
+                                    <p className="truncate text-sm font-semibold text-gray-900">{user?.name || 'Admin'}</p>
+                                    <p className="truncate text-xs text-gray-500">{user?.email || ''}</p>
+                                </div>
+                                <div className="py-1">
+                                    <Link
+                                        href="/settings/profile"
+                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                        onClick={() => setMenuOpen(false)}
+                                        role="menuitem"
+                                    >
+                                        <UserIcon className="h-4 w-4 text-gray-500" />
+                                        Profile
+                                    </Link>
+                                    <Link
+                                        href="/admin/payment-settings"
+                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                        onClick={() => setMenuOpen(false)}
+                                        role="menuitem"
+                                    >
+                                        <CreditCard className="h-4 w-4 text-gray-500" />
+                                        Payment Settings
+                                    </Link>
+                                    <Link
+                                        href="/"
+                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                        onClick={() => setMenuOpen(false)}
+                                        role="menuitem"
+                                    >
+                                        <ExternalLink className="h-4 w-4 text-gray-500" />
+                                        View Site
+                                    </Link>
+                                </div>
+                                <div className="border-t border-gray-100 py-1">
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                                        onClick={() => setMenuOpen(false)}
+                                        role="menuitem"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        Sign Out
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

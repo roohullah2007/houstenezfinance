@@ -20,8 +20,8 @@ class RealEstatePageContent extends Model
             [
                 'heading' => 'Houston First-Time Home Buying Assistance Programs & Grants',
                 'body' => 'Explore programs, grants, and financing options available for first-time home buyers in the Houston area. Contact us below for personalized guidance.',
-                'secondary_heading' => 'Trusted Dealer Network',
-                'secondary_body' => 'Shop with confidence from our verified dealer partners across Houston. Browse Listings Available for True In House Financing along with complete transparency for Buyers with Credit Problems or No Credit.',
+                'secondary_heading' => null,
+                'secondary_body' => null,
             ]
         );
     }
