@@ -21,6 +21,7 @@ import {
     Youtube,
     Check,
     Minus,
+    FileText,
 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
@@ -321,6 +322,21 @@ export default function ShowCarListing({ listing, availableFeatures = [] }: Prop
                                     <MapPin className="h-4 w-4" />
                                     {listing.city}, {listing.state}
                                 </p>
+                            </div>
+
+                            {/* Apply for Financing */}
+                            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-[#0b1020] p-6 text-center shadow-sm">
+                                <h3 className="flex items-center justify-center gap-2 text-lg font-semibold text-white">
+                                    <FileText className="h-5 w-5" />
+                                    Apply for Financing
+                                </h3>
+                                <Link
+                                    href={`/finance-application?listing=${listing.id}`}
+                                    className="mt-4 inline-flex w-full items-center justify-center rounded-md border-2 bg-white px-6 py-3 text-base font-bold uppercase tracking-wide transition hover:bg-[#F26B5E] hover:text-white"
+                                    style={{ color: ACCENT, borderColor: ACCENT }}
+                                >
+                                    Apply Now!
+                                </Link>
                             </div>
 
                             {/* Contact the Owner — inquiry form */}

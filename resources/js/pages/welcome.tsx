@@ -156,7 +156,7 @@ const whyChoose = [
     {
         Icon: ShieldCheck,
         title: 'Trusted Dealers',
-        desc: 'Work only with verified and top-rated dealerships across the country.',
+        desc: 'Work only with verified and top-rated dealerships across Houston.',
     },
     {
         Icon: BadgeDollarSign,
