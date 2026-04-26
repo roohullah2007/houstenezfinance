@@ -983,6 +983,24 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                 })}
                             </div>
 
+                            {/* Featured Video Tour */}
+                            <div className="mt-12">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Play className="h-5 w-5 fill-current" style={{ color: ACCENT }} />
+                                    <h2 className="text-lg font-semibold text-slate-900">Featured Video Tour</h2>
+                                </div>
+                                <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                                    <iframe
+                                        className="absolute inset-0 h-full w-full"
+                                        src="https://www.youtube.com/embed/kJ0XcrUckUs"
+                                        title="Vehicle Video Tour"
+                                        frameBorder={0}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                    />
+                                </div>
+                            </div>
+
                             {/* Pagination */}
                             {listings.last_page > 1 && (
                                 <div className="mt-10 flex items-center justify-center gap-2">
