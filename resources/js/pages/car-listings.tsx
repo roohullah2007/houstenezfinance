@@ -991,10 +991,9 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                 </div>
                                 <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: '56.25%' }}>
                                     <iframe
-                                        className="absolute inset-0 h-full w-full"
+                                        className="absolute inset-0 h-full w-full border-0"
                                         src="https://www.youtube.com/embed/kJ0XcrUckUs"
                                         title="Vehicle Video Tour"
-                                        frameBorder={0}
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                         allowFullScreen
                                     />
