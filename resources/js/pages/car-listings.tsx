@@ -16,6 +16,7 @@ import {
     Phone,
     Mail,
     MapPin,
+    Play,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { RangeSlider } from '@/components/range-slider';
@@ -37,6 +38,7 @@ interface CarListing {
     vehicle_type: string;
     images: string[] | null;
     main_image_index: number;
+    video_url: string | null;
     created_at: string;
 }
 
@@ -950,6 +952,12 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                                 <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
                                                     {timeAgo(car.created_at)}
                                                 </div>
+                                                {car.video_url && (
+                                                    <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white">
+                                                        <Play className="h-2.5 w-2.5 fill-white" />
+                                                        Video
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="p-3">
                                                 <h3 className="truncate text-sm font-semibold text-slate-900">{car.title}</h3>
