@@ -989,7 +989,7 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                     <Play className="h-5 w-5 fill-current" style={{ color: ACCENT }} />
                                     <h2 className="text-lg font-semibold text-slate-900">Featured Video Tour</h2>
                                 </div>
-                                <div className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: 'min(40%, 320px)' }}>
+                                <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: 'min(40%, 480px)' }}>
                                     <iframe
                                         className="absolute inset-0 h-full w-full border-0"
                                         src="https://www.youtube.com/embed/kJ0XcrUckUs"
