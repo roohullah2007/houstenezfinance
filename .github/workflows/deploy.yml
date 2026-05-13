@@ -34,7 +34,6 @@ jobs:
           npm install
           npm run build
 
-      # Is step mein error detection behtar ki hai
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -44,7 +43,6 @@ jobs:
           port: 22
           source: "."
           target: ${{ secrets.APP_PATH }}
-          rm: false # Purani files delete nahi karega, sirf update karega
 
       - name: Post-Deployment Commands
         uses: appleboy/ssh-action@v1.0.3
