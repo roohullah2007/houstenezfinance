@@ -21,7 +21,7 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Create Temporary .env for Build
+      - name: Create Temporary .env
         run: cp .env.example .env || touch .env
 
       - name: Setup Node.js
@@ -34,8 +34,7 @@ jobs:
           npm install
           npm run build
 
-      # ZAROORI: VPS par asli .env ko bachane ke liye temp .env delete karein
-      - name: Remove Temporary .env before Upload
+      - name: Remove Temporary .env
         run: rm .env
 
       - name: Deploy to VPS
@@ -44,7 +43,6 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
           source: "."
           target: ${{ secrets.APP_PATH }}
 
