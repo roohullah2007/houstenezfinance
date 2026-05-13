@@ -9,22 +9,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub Robot code download karega
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Frontend Build (React/Inertia)
+      # 1. Setup PHP (Taake Vite build ke waqt artisan chal sakay)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, iconv, mysql
+
+      # 2. Install Composer dependencies (GitHub runner par)
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # 3. Create Dummy .env (Artisan commands ke liye zaroori hai)
+      - name: Create .env
+        run: cp .env.example .env || touch .env
+
+      # 4. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      # 5. Build Frontend (Ab ye fail nahi hoga)
       - name: Build Frontend
         run: |
           npm install
           npm run build
 
-      # 3. Files ko VPS par transfer karna
+      # 6. Deploy to VPS
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -34,7 +49,7 @@ jobs:
           source: "."
           target: ${{ secrets.APP_PATH }}
 
-      # 4. VPS par Laravel commands chalana
+      # 7. Final VPS Commands
       - name: Post-Deployment Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -43,8 +58,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            composer install --no-dev --optimize-autoloader --no-interaction
+            sudo chown -R www-data:www-data storage bootstrap/cache
             php artisan migrate --force
             php artisan optimize
-            sudo chown -R www-data:www-data storage bootstrap/cache
             sudo systemctl reload php8.3-fpm
