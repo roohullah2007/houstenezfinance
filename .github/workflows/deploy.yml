@@ -12,44 +12,40 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Setup PHP 8.4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
           extensions: mbstring, xml, ctype, iconv, mysql
 
-      # 2. Install Composer Dependencies
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      # 3. Create Dummy .env
       - name: Create .env
         run: cp .env.example .env || touch .env
 
-      # 4. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # 5. Build Frontend
       - name: Build Frontend
         run: |
           npm install
           npm run build
 
-      # 6. Deploy to VPS
+      # Is step mein error detection behtar ki hai
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
           source: "."
           target: ${{ secrets.APP_PATH }}
+          rm: false # Purani files delete nahi karega, sirf update karega
 
-      # 7. Final VPS Commands
       - name: Post-Deployment Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -58,7 +54,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            sudo chown -R www-data:www-data storage bootstrap/cache
+            sudo chown -R www-data:www-data .
+            sudo chmod -R 775 storage bootstrap/cache
             php artisan migrate --force
             php artisan optimize
             sudo systemctl reload php8.4-fpm
