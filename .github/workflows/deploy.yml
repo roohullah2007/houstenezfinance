@@ -58,4 +58,8 @@ jobs:
             sudo chmod -R 775 storage bootstrap/cache
             php artisan migrate --force
             php artisan optimize
+
+            # Queue restart taake naya code background jobs mein update ho jaye
+            sudo supervisorctl restart laravel-worker:*
+
             sudo systemctl reload php8.4-fpm
