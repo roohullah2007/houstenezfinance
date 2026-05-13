@@ -21,7 +21,7 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Create .env
+      - name: Create Temporary .env for Build
         run: cp .env.example .env || touch .env
 
       - name: Setup Node.js
@@ -33,6 +33,10 @@ jobs:
         run: |
           npm install
           npm run build
+
+      # ZAROORI: VPS par asli .env ko bachane ke liye temp .env delete karein
+      - name: Remove Temporary .env before Upload
+        run: rm .env
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
