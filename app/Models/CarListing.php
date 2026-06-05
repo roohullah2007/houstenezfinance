@@ -40,6 +40,7 @@ class CarListing extends Model
         'payment_token',
         'payment_status',
         'stripe_payment_intent_id',
+        'paypal_order_id',
         'payment_amount',
         'paid_at',
     ];

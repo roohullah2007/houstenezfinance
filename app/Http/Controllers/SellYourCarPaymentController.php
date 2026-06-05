@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\CarListing;
 use App\Models\SiteSetting;
+use App\Support\PayPalClient;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Stripe\StripeClient;
 
 class SellYourCarPaymentController extends Controller
 {
@@ -16,16 +16,17 @@ class SellYourCarPaymentController extends Controller
             ->where('payment_status', 'pending')
             ->firstOrFail();
 
-        $publishableKey = SiteSetting::get('stripe_publishable_key');
-        if (empty($publishableKey)) {
+        $clientId = SiteSetting::get('paypal_client_id');
+        if (empty($clientId)) {
             abort(503, 'Payment is not configured.');
         }
 
         return Inertia::render('sell-your-car/payment', [
             'token' => $token,
-            'publishable_key' => $publishableKey,
+            'paypal_client_id' => $clientId,
+            'paypal_environment' => (string) SiteSetting::get('paypal_environment', 'sandbox'),
             'amount' => (float) $listing->payment_amount,
-            'currency' => strtolower((string) SiteSetting::get('currency', 'usd')),
+            'currency' => strtoupper((string) SiteSetting::get('currency', 'usd')),
             'listing' => [
                 'title' => $listing->title,
                 'year' => $listing->year,
@@ -38,73 +39,64 @@ class SellYourCarPaymentController extends Controller
         ]);
     }
 
-    public function createIntent(Request $request, string $token)
+    public function createOrder(Request $request, string $token)
     {
         $listing = CarListing::where('payment_token', $token)
             ->where('payment_status', 'pending')
             ->firstOrFail();
 
-        $secret = SiteSetting::get('stripe_secret_key');
-        if (empty($secret)) {
-            return response()->json(['error' => 'Stripe is not configured.'], 503);
+        $paypal = new PayPalClient();
+        if (! $paypal->isConfigured()) {
+            return response()->json(['error' => 'PayPal is not configured.'], 503);
         }
 
-        $stripe = new StripeClient($secret);
-        $currency = strtolower((string) SiteSetting::get('currency', 'usd'));
-        $amountCents = (int) round(((float) $listing->payment_amount) * 100);
+        try {
+            $currency = (string) SiteSetting::get('currency', 'usd');
+            $order = $paypal->createOrder(
+                (float) $listing->payment_amount,
+                $currency,
+                "Listing fee: {$listing->year} {$listing->make} {$listing->model}",
+                (string) $listing->id,
+            );
 
-        if ($listing->stripe_payment_intent_id) {
-            try {
-                $intent = $stripe->paymentIntents->retrieve($listing->stripe_payment_intent_id);
-                if (in_array($intent->status, ['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing'], true)) {
-                    return response()->json(['client_secret' => $intent->client_secret]);
-                }
-            } catch (\Throwable) {
-            }
+            $listing->update(['paypal_order_id' => $order['id']]);
+
+            return response()->json(['id' => $order['id']]);
+        } catch (\Throwable) {
+            return response()->json(['error' => 'Could not start PayPal checkout.'], 502);
         }
-
-        $intent = $stripe->paymentIntents->create([
-            'amount' => $amountCents,
-            'currency' => $currency,
-            'description' => "Listing fee: {$listing->year} {$listing->make} {$listing->model}",
-            'receipt_email' => $listing->email,
-            'metadata' => [
-                'car_listing_id' => $listing->id,
-                'payment_token' => $token,
-            ],
-            'automatic_payment_methods' => ['enabled' => true],
-        ]);
-
-        $listing->update([
-            'stripe_payment_intent_id' => $intent->id,
-        ]);
-
-        return response()->json(['client_secret' => $intent->client_secret]);
     }
 
-    public function confirm(Request $request, string $token)
+    public function capture(Request $request, string $token)
     {
         $listing = CarListing::where('payment_token', $token)->firstOrFail();
 
-        $secret = SiteSetting::get('stripe_secret_key');
-        if (empty($secret) || empty($listing->stripe_payment_intent_id)) {
-            return redirect()->route('sell-your-car.payment', ['token' => $token])
-                ->withErrors(['payment' => 'Payment could not be verified.']);
+        $orderId = $listing->paypal_order_id ?: $request->input('order_id');
+        if (empty($orderId)) {
+            return response()->json(['error' => 'Payment not completed.'], 422);
         }
 
-        $stripe = new StripeClient($secret);
-        $intent = $stripe->paymentIntents->retrieve($listing->stripe_payment_intent_id);
+        $paypal = new PayPalClient();
 
-        if ($intent->status === 'succeeded') {
-            $listing->update([
-                'payment_status' => 'paid',
-                'paid_at' => now(),
-            ]);
-            return redirect()->route('sell-your-car.thank-you');
+        try {
+            $result = $paypal->captureOrder((string) $orderId);
+
+            $topStatus = $result['status'] ?? null;
+            $captureStatus = $result['purchase_units'][0]['payments']['captures'][0]['status'] ?? null;
+
+            if ($topStatus === 'COMPLETED' || $captureStatus === 'COMPLETED') {
+                $listing->update([
+                    'payment_status' => 'paid',
+                    'paid_at' => now(),
+                ]);
+
+                return response()->json(['status' => 'completed']);
+            }
+
+            return response()->json(['error' => 'Payment not completed.'], 422);
+        } catch (\Throwable) {
+            return response()->json(['error' => 'Could not verify PayPal payment.'], 502);
         }
-
-        return redirect()->route('sell-your-car.payment', ['token' => $token])
-            ->withErrors(['payment' => 'Payment not complete. Status: ' . $intent->status]);
     }
 
     public function thankYou()

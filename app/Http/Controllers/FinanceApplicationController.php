@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FinanceApplication;
+use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -99,6 +100,25 @@ class FinanceApplicationController extends Controller
         $validated['status'] = 'new';
 
         FinanceApplication::create($validated);
+
+        OwnerNotifier::send(
+            'Finance Application',
+            trim("{$validated['first_name']} {$validated['last_name']}"),
+            [
+                'Name' => trim("{$validated['first_name']} {$validated['last_name']}"),
+                'Email' => $validated['email'],
+                'Phone' => $validated['phone'],
+                'Date of Birth' => $validated['date_of_birth'] ?? null,
+                'Marital Status' => $validated['marital_status'] ?? null,
+                'Address' => trim(($validated['current_address'] ?? '').', '.($validated['current_city'] ?? '').', '.($validated['current_state'] ?? '').' '.($validated['current_zip'] ?? ''), ', '),
+                'Employer' => $validated['employer_name'] ?? null,
+                'Monthly Income' => $validated['monthly_income'] ?? null,
+                'Vehicle of Interest' => $validated['vehicle_of_interest'] ?? null,
+                'Down Payment' => $validated['down_payment'] ?? null,
+                'Has Co-Applicant' => $validated['has_co_applicant'] ? 'Yes' : 'No',
+            ],
+            $validated['email'],
+        );
 
         return redirect()->route('finance-application')->with('success', 'Application submitted. We will review and contact you shortly.');
     }

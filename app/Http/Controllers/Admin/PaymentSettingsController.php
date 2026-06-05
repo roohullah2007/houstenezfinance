@@ -11,18 +11,18 @@ class PaymentSettingsController extends Controller
 {
     public function edit()
     {
-        $publishableKey = SiteSetting::get('stripe_publishable_key', '');
-        $secretKeySet = (bool) SiteSetting::get('stripe_secret_key');
+        $clientId = SiteSetting::get('paypal_client_id', '');
+        $clientSecretSet = (bool) SiteSetting::get('paypal_client_secret');
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
 
         return Inertia::render('dashboard/payment-settings', [
             'settings' => [
-                'stripe_test_mode' => (bool) SiteSetting::get('stripe_test_mode', true),
-                'stripe_publishable_key' => $publishableKey,
-                'stripe_secret_key_set' => $secretKeySet,
+                'paypal_environment' => SiteSetting::get('paypal_environment', 'sandbox'),
+                'paypal_client_id' => $clientId,
+                'paypal_client_secret_set' => $clientSecretSet,
                 'listing_fee' => $listingFee,
                 'currency' => SiteSetting::get('currency', 'usd'),
-                'payment_active' => $listingFee > 0 && ! empty($publishableKey) && $secretKeySet,
+                'payment_active' => $listingFee > 0 && ! empty($clientId) && $clientSecretSet,
             ],
         ]);
     }
@@ -30,27 +30,20 @@ class PaymentSettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'stripe_test_mode' => 'boolean',
-            'stripe_publishable_key' => 'nullable|string|max:255',
-            'stripe_secret_key' => 'nullable|string|max:255',
+            'paypal_environment' => 'required|in:sandbox,live',
+            'paypal_client_id' => 'nullable|string|max:255',
+            'paypal_client_secret' => 'nullable|string|max:255',
             'listing_fee' => 'required|numeric|min:0|max:99999',
             'currency' => 'required|string|size:3',
         ]);
 
-        SiteSetting::set('stripe_test_mode', $validated['stripe_test_mode'] ? '1' : '0');
-        SiteSetting::set('stripe_publishable_key', $validated['stripe_publishable_key'] ?? '');
-        if (! empty($validated['stripe_secret_key'])) {
-            SiteSetting::set('stripe_secret_key', $validated['stripe_secret_key'], encrypt: true);
+        SiteSetting::set('paypal_environment', $validated['paypal_environment']);
+        SiteSetting::set('paypal_client_id', $validated['paypal_client_id'] ?? '');
+        if (! empty($validated['paypal_client_secret'])) {
+            SiteSetting::set('paypal_client_secret', $validated['paypal_client_secret'], encrypt: true);
         }
         SiteSetting::set('listing_fee', (string) $validated['listing_fee']);
         SiteSetting::set('currency', strtolower($validated['currency']));
-
-        // Keep legacy stripe_enabled in sync for backward compatibility.
-        $secretKeySet = (bool) SiteSetting::get('stripe_secret_key');
-        $active = ((float) $validated['listing_fee']) > 0
-            && ! empty($validated['stripe_publishable_key'] ?? null)
-            && $secretKeySet;
-        SiteSetting::set('stripe_enabled', $active ? '1' : '0');
 
         return redirect()->route('admin.payment-settings.edit')->with('success', 'Payment settings saved.');
     }
