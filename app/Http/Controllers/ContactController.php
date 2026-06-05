@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +41,19 @@ class ContactController extends Controller
         ContactMessage::create(collect($validated)->only([
             'name', 'email', 'phone', 'subject', 'message',
         ])->all());
+
+        OwnerNotifier::send(
+            'Contact Message',
+            $validated['subject'],
+            [
+                'Name' => $validated['name'],
+                'Email' => $validated['email'],
+                'Phone' => $validated['phone'] ?? null,
+                'Subject' => $validated['subject'],
+                'Message' => $validated['message'],
+            ],
+            $validated['email'],
+        );
 
         return redirect()->route('contact')->with('success', 'Your message has been sent! We will get back to you soon.');
     }

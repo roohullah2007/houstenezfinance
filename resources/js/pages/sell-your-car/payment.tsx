@@ -1,11 +1,15 @@
 import { Head, router } from '@inertiajs/react';
 import { PublicHeader } from '@/components/public-header';
-import { loadStripe, type Stripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Lock, CheckCircle2, ShieldCheck, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Lock, ShieldCheck, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const ACCENT = '#F26B5E';
+
+declare global {
+    interface Window {
+        paypal?: any;
+    }
+}
 
 interface Listing {
     title: string;
@@ -19,111 +23,105 @@ interface Listing {
 
 interface Props {
     token: string;
-    publishable_key: string;
+    paypal_client_id: string;
+    paypal_environment: string;
     amount: number;
     currency: string;
     listing: Listing;
 }
 
-function PaymentForm({ token, amount, currency }: { token: string; amount: number; currency: string }) {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    async function handleSubmit(e: FormEvent) {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-
-        setSubmitting(true);
-        setError(null);
-
-        const { error: submitError } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: `${window.location.origin}/sell-your-car/payment/${token}/confirm`,
-            },
-        });
-
-        if (submitError) {
-            setError(submitError.message || 'Payment could not be processed.');
-            setSubmitting(false);
-        }
-    }
-
-    const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(amount);
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="rounded-xl border border-gray-200 bg-white p-5">
-                <PaymentElement options={{ layout: 'tabs' }} />
-            </div>
-
-            {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-                    <p>{error}</p>
-                </div>
-            )}
-
-            <button
-                type="submit"
-                disabled={!stripe || submitting}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white shadow-lg transition hover:brightness-110 disabled:opacity-50"
-                style={{ backgroundColor: ACCENT }}
-            >
-                <Lock className="h-4 w-4" />
-                {submitting ? 'Processing…' : `Pay ${formatted}`}
-            </button>
-
-            <p className="text-center text-xs text-gray-500">
-                Secured by Stripe — card details never touch our servers.
-            </p>
-        </form>
-    );
+function csrfToken(): string {
+    return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
 }
 
-export default function SellYourCarPayment({ token, publishable_key, amount, currency, listing }: Props) {
-    const [stripePromise] = useState<Promise<Stripe | null>>(() => loadStripe(publishable_key));
-    const [clientSecret, setClientSecret] = useState<string | null>(null);
-    const [loadError, setLoadError] = useState<string | null>(null);
+const fetchHeaders = () => ({
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'X-CSRF-TOKEN': csrfToken(),
+});
+
+export default function SellYourCarPayment({ token, paypal_client_id, amount, currency, listing }: Props) {
+    const buttonsRef = useRef<HTMLDivElement | null>(null);
+    const [ready, setReady] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const controller = new AbortController();
-        fetch(`/sell-your-car/payment/${token}/intent`, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '',
-            },
-            signal: controller.signal,
-        })
-            .then(async (r) => {
-                if (!r.ok) throw new Error((await r.json()).error || 'Could not start payment.');
-                return r.json();
-            })
-            .then((data) => setClientSecret(data.client_secret))
-            .catch((err) => {
-                if (err.name !== 'AbortError') setLoadError(err.message);
-            });
-        return () => controller.abort();
-    }, [token]);
+        let cancelled = false;
 
-    const appearance = useMemo(
-        () => ({
-            theme: 'stripe' as const,
-            variables: {
-                colorPrimary: ACCENT,
-                colorBackground: '#ffffff',
-                colorText: '#0f172a',
-                borderRadius: '8px',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-            },
-        }),
-        [],
-    );
+        function renderButtons() {
+            if (cancelled || !window.paypal || !buttonsRef.current) return;
+            buttonsRef.current.innerHTML = '';
+
+            window.paypal
+                .Buttons({
+                    createOrder: async () => {
+                        const res = await fetch(`/sell-your-car/payment/${token}/order`, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: fetchHeaders(),
+                        });
+                        if (!res.ok) throw new Error((await res.json()).error || 'Could not start PayPal checkout.');
+                        const data = await res.json();
+                        return data.id;
+                    },
+                    onApprove: async () => {
+                        try {
+                            const res = await fetch(`/sell-your-car/payment/${token}/capture`, {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: fetchHeaders(),
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.status === 'completed') {
+                                router.visit('/sell-your-car/thank-you');
+                            } else {
+                                setError(data.error || 'Payment could not be verified.');
+                            }
+                        } catch {
+                            setError('Payment could not be verified. Please try again.');
+                        }
+                    },
+                    onError: () => {
+                        setError('Something went wrong with PayPal. Please try again.');
+                    },
+                })
+                .render(buttonsRef.current)
+                .then(() => {
+                    if (!cancelled) setReady(true);
+                })
+                .catch(() => {
+                    if (!cancelled) setError('Could not load PayPal checkout.');
+                });
+        }
+
+        if (window.paypal) {
+            renderButtons();
+            return () => {
+                cancelled = true;
+            };
+        }
+
+        const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypal_client_id)}&currency=${encodeURIComponent(currency)}&intent=capture`;
+        let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
+
+        if (!script) {
+            script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.onload = () => renderButtons();
+            script.onerror = () => {
+                if (!cancelled) setError('Could not load PayPal. Please check your connection and try again.');
+            };
+            document.body.appendChild(script);
+        } else {
+            script.addEventListener('load', renderButtons);
+        }
+
+        return () => {
+            cancelled = true;
+            script?.removeEventListener('load', renderButtons);
+        };
+    }, [token, paypal_client_id, currency]);
 
     const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(amount);
 
@@ -164,27 +162,29 @@ export default function SellYourCarPayment({ token, publishable_key, amount, cur
                                     </div>
                                     <div>
                                         <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
-                                        <p className="text-xs text-gray-500">Powered by Stripe — SSL encrypted</p>
+                                        <p className="text-xs text-gray-500">Powered by PayPal — SSL encrypted</p>
                                     </div>
                                 </div>
 
-                                {loadError && (
-                                    <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                                {error && (
+                                    <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                                         <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-                                        <p>{loadError}</p>
+                                        <p>{error}</p>
                                     </div>
                                 )}
 
-                                {!clientSecret && !loadError && (
+                                {!ready && !error && (
                                     <div className="flex items-center justify-center py-16">
                                         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#F26B5E]" />
                                     </div>
                                 )}
 
-                                {clientSecret && (
-                                    <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-                                        <PaymentForm token={token} amount={amount} currency={currency} />
-                                    </Elements>
+                                <div ref={buttonsRef} className={ready ? 'block' : 'hidden'} />
+
+                                {ready && (
+                                    <p className="mt-4 text-center text-xs text-gray-500">
+                                        Secured by PayPal — pay with your PayPal balance or any major card.
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -218,7 +218,7 @@ export default function SellYourCarPayment({ token, publishable_key, amount, cur
                                         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" style={{ color: ACCENT }} />
                                         <div className="text-xs leading-relaxed text-gray-600">
                                             <p className="font-semibold text-gray-900">Secure Checkout</p>
-                                            <p className="mt-1">Card details are handled by Stripe and never stored on our servers.</p>
+                                            <p className="mt-1">Payments are processed by PayPal. Your financial details are never stored on our servers.</p>
                                         </div>
                                     </div>
                                 </div>

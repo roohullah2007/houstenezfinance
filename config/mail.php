@@ -115,4 +115,16 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Owner Notification Recipient
+    |--------------------------------------------------------------------------
+    |
+    | The email address that receives a notification every time a public
+    | form is submitted on the website.
+    |
+    */
+
+    'notify_to' => env('MAIL_NOTIFY_TO', 'houstonezfinance@gmail.com'),
+
 ];

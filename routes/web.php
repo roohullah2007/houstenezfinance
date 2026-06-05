@@ -32,8 +32,8 @@ Route::get('/sell-your-car', [CarListingController::class, 'create'])->name('sel
 Route::post('/sell-your-car', [CarListingController::class, 'store'])->name('sell-your-car.store');
 Route::get('/sell-your-car/thank-you', [SellYourCarPaymentController::class, 'thankYou'])->name('sell-your-car.thank-you');
 Route::get('/sell-your-car/payment/{token}', [SellYourCarPaymentController::class, 'show'])->name('sell-your-car.payment');
-Route::post('/sell-your-car/payment/{token}/intent', [SellYourCarPaymentController::class, 'createIntent'])->name('sell-your-car.payment.intent');
-Route::get('/sell-your-car/payment/{token}/confirm', [SellYourCarPaymentController::class, 'confirm'])->name('sell-your-car.payment.confirm');
+Route::post('/sell-your-car/payment/{token}/order', [SellYourCarPaymentController::class, 'createOrder'])->name('sell-your-car.payment.order');
+Route::post('/sell-your-car/payment/{token}/capture', [SellYourCarPaymentController::class, 'capture'])->name('sell-your-car.payment.capture');
 
 Route::get('/contact', [ContactController::class, 'create'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');

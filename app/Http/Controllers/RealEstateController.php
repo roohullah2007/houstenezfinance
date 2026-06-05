@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContactMessage;
 use App\Models\RealEstateListing;
 use App\Models\RealEstatePageContent;
+use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -77,6 +78,18 @@ class RealEstateController extends Controller
             'message' => $validated['message'],
         ]);
 
+        OwnerNotifier::send(
+            'Real Estate Inquiry',
+            $validated['name'],
+            [
+                'Name' => $validated['name'],
+                'Email' => $validated['email'],
+                'Phone' => $validated['phone'],
+                'Message' => $validated['message'],
+            ],
+            $validated['email'],
+        );
+
         return redirect()->route('real-estate')->with('success', 'Thanks! We will contact you shortly.');
     }
 
@@ -108,6 +121,21 @@ class RealEstateController extends Controller
             'subject' => "Property Inquiry: {$realEstateListing->title}",
             'message' => $validated['message'] . "\n\n— Property: {$realEstateListing->title} ({$realEstateListing->address}, {$realEstateListing->city})",
         ]);
+
+        $property = trim("{$realEstateListing->title} ({$realEstateListing->address}, {$realEstateListing->city})");
+
+        OwnerNotifier::send(
+            'Real Estate Inquiry',
+            "{$validated['name']} — {$realEstateListing->title}",
+            [
+                'Name' => $validated['name'],
+                'Email' => $validated['email'],
+                'Phone' => $validated['phone'],
+                'Property' => $property,
+                'Message' => $validated['message'],
+            ],
+            $validated['email'],
+        );
 
         return back()->with('success', 'Your message has been sent! We will contact you shortly.');
     }

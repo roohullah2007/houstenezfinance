@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CarListing;
 use App\Models\ListingFeature;
 use App\Models\SiteSetting;
+use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -154,9 +155,9 @@ class CarListingController extends Controller
     public function create()
     {
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
-        $publishableKey = SiteSetting::get('stripe_publishable_key');
-        $secretKey = SiteSetting::get('stripe_secret_key');
-        $paymentActive = $listingFee > 0 && ! empty($publishableKey) && ! empty($secretKey);
+        $clientId = SiteSetting::get('paypal_client_id');
+        $clientSecret = SiteSetting::get('paypal_client_secret');
+        $paymentActive = $listingFee > 0 && ! empty($clientId) && ! empty($clientSecret);
 
         return Inertia::render('sell-your-car', [
             'payment' => [
@@ -230,11 +231,11 @@ class CarListingController extends Controller
         $validated['status'] = 'pending';
 
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
-        $publishableKey = SiteSetting::get('stripe_publishable_key');
-        $secretKey = SiteSetting::get('stripe_secret_key');
+        $clientId = SiteSetting::get('paypal_client_id');
+        $clientSecret = SiteSetting::get('paypal_client_secret');
         $paymentRequired = $listingFee > 0
-            && ! empty($publishableKey)
-            && ! empty($secretKey);
+            && ! empty($clientId)
+            && ! empty($clientSecret);
 
         if ($paymentRequired) {
             $validated['payment_token'] = Str::random(48);
@@ -243,6 +244,25 @@ class CarListingController extends Controller
         }
 
         $listing = CarListing::create($validated);
+
+        $vehicle = trim("{$validated['year']} {$validated['make']} {$validated['model']}");
+
+        OwnerNotifier::send(
+            'New Car Listing Submission',
+            trim("{$validated['first_name']} {$validated['last_name']} — {$vehicle}"),
+            [
+                'Seller Name' => trim("{$validated['first_name']} {$validated['last_name']}"),
+                'Email' => $validated['email'],
+                'Phone' => $validated['phone'],
+                'Vehicle' => $vehicle,
+                'Title' => $validated['title'],
+                'Price' => $validated['price'],
+                'Mileage' => $validated['miles'],
+                'City/State' => trim("{$validated['city']}, {$validated['state']}", ', '),
+                'Payment' => $paymentRequired ? 'Listing fee pending' : 'No fee required',
+            ],
+            $validated['email'],
+        );
 
         if ($paymentRequired) {
             return redirect()->route('sell-your-car.payment', ['token' => $listing->payment_token]);
