@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, CreditCard, Lock, AlertTriangle, XCircle } from 'lucide-react';
-import { type FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
 interface Settings {
     paypal_environment: string;
@@ -21,6 +21,9 @@ const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
 export default function PaymentSettings({ settings }: Props) {
     const flash = (usePage().props as { flash?: { success?: string } }).flash;
 
+    const [testing, setTesting] = useState(false);
+    const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
     const { data, setData, put, processing, errors } = useForm({
         paypal_environment: settings.paypal_environment || 'sandbox',
         paypal_client_id: settings.paypal_client_id || '',
@@ -35,6 +38,27 @@ export default function PaymentSettings({ settings }: Props) {
             preserveScroll: true,
             onSuccess: () => setData('paypal_client_secret', ''),
         });
+    }
+
+    async function handleTest() {
+        setTesting(true);
+        setTestResult(null);
+        try {
+            const res = await fetch('/admin/payment-settings/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '',
+                },
+            });
+            const data = await res.json();
+            setTestResult({ ok: !!data.ok, message: data.message || 'Unexpected response.' });
+        } catch {
+            setTestResult({ ok: false, message: 'Could not reach the server to run the test.' });
+        } finally {
+            setTesting(false);
+        }
     }
 
     return (
@@ -202,7 +226,32 @@ export default function PaymentSettings({ settings }: Props) {
                         </div>
                     )}
 
-                    <div className="flex justify-end">
+                    {testResult && (
+                        testResult.ok ? (
+                            <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-3">
+                                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                                <p className="text-sm font-medium text-green-800">{testResult.message}</p>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-3">
+                                <XCircle className="h-5 w-5 shrink-0 text-red-600" />
+                                <p className="text-sm font-medium text-red-800">{testResult.message}</p>
+                            </div>
+                        )
+                    )}
+
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex flex-col items-start gap-1">
+                            <button
+                                type="button"
+                                onClick={handleTest}
+                                disabled={testing}
+                                className="rounded-full border border-gray-300 bg-white px-7 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                {testing ? 'Testing…' : 'Test Connection'}
+                            </button>
+                            <p className="text-xs text-gray-500">Tests the saved credentials. Save your changes first.</p>
+                        </div>
                         <button
                             type="submit"
                             disabled={processing}

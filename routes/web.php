@@ -78,6 +78,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     Route::get('payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
     Route::put('payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
+    Route::post('payment-settings/test', [PaymentSettingsController::class, 'testConnection'])->name('payment-settings.test');
 
     Route::get('listing-features', [AdminListingFeatureController::class, 'index'])->name('listing-features.index');
     Route::post('listing-features', [AdminListingFeatureController::class, 'store'])->name('listing-features.store');
