@@ -47,4 +47,38 @@ class PaymentSettingsController extends Controller
 
         return redirect()->route('admin.payment-settings.edit')->with('success', 'Payment settings saved.');
     }
+
+    public function testConnection()
+    {
+        $paypal = new \App\Support\PayPalClient();
+
+        if (! $paypal->isConfigured()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Add your Client ID and Secret and click Save before testing.',
+            ]);
+        }
+
+        $environment = (string) SiteSetting::get('paypal_environment', 'sandbox');
+
+        try {
+            $token = $paypal->accessToken();
+            if (! empty($token)) {
+                return response()->json([
+                    'ok' => true,
+                    'message' => "Connection successful — your {$environment} PayPal credentials are valid.",
+                ]);
+            }
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'PayPal did not return an access token. Check your credentials.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => "Connection failed for {$environment} mode. Double-check the Client ID/Secret and that the Environment matches the keys.",
+            ]);
+        }
+    }
 }
