@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ListingReceived;
 use App\Models\CarListing;
 use App\Models\ListingFeature;
 use App\Models\SiteSetting;
 use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -22,10 +25,10 @@ class CarListingController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('make', 'like', "%{$search}%")
-                  ->orWhere('model', 'like', "%{$search}%")
-                  ->orWhere('city', 'like', "%{$search}%")
-                  ->orWhere('state', 'like', "%{$search}%");
+                    ->orWhere('make', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('state', 'like', "%{$search}%");
             });
         }
 
@@ -215,7 +218,7 @@ class CarListingController extends Controller
         unset($validated['captcha_token'], $validated['captcha_answer']);
 
         if (isset($validated['features']) && is_array($validated['features'])) {
-            $validated['features'] = implode(', ', array_values(array_filter($validated['features'], fn($v) => is_string($v) && trim($v) !== '')));
+            $validated['features'] = implode(', ', array_values(array_filter($validated['features'], fn ($v) => is_string($v) && trim($v) !== '')));
         }
 
         $imagePaths = [];
@@ -263,6 +266,16 @@ class CarListingController extends Controller
             ],
             $validated['email'],
         );
+
+        $sellerName = trim("{$validated['first_name']} {$validated['last_name']}");
+
+        try {
+            Mail::to($validated['email'])->send(
+                new ListingReceived($sellerName, $vehicle, $validated['title'], $paymentRequired)
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Listing confirmation email failed: '.$e->getMessage());
+        }
 
         if ($paymentRequired) {
             return redirect()->route('sell-your-car.payment', ['token' => $listing->payment_token]);

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Car, Building2, ClipboardList, CreditCard, FileText, LayoutGrid, Mail } from 'lucide-react';
+import { Car, Building2, ClipboardList, CreditCard, FileText, LayoutGrid, Mail, MailCheck } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -45,6 +45,11 @@ const mainNavItems: NavItem[] = [
         title: 'Payment Settings',
         href: '/admin/payment-settings',
         icon: CreditCard,
+    },
+    {
+        title: 'Email Settings',
+        href: '/admin/email-settings',
+        icon: MailCheck,
     },
 ];
 
