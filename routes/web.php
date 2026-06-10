@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CarListingController as AdminCarListingController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmailSettingsController;
 use App\Http\Controllers\Admin\FinanceApplicationController as AdminFinanceApplicationController;
 use App\Http\Controllers\Admin\InquiryController as AdminInquiryController;
 use App\Http\Controllers\Admin\ListingFeatureController as AdminListingFeatureController;
@@ -79,6 +80,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
     Route::put('payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
     Route::post('payment-settings/test', [PaymentSettingsController::class, 'testConnection'])->name('payment-settings.test');
+
+    Route::get('email-settings', [EmailSettingsController::class, 'edit'])->name('email-settings.edit');
+    Route::put('email-settings', [EmailSettingsController::class, 'update'])->name('email-settings.update');
+    Route::post('email-settings/test', [EmailSettingsController::class, 'sendTest'])->name('email-settings.test');
 
     Route::get('listing-features', [AdminListingFeatureController::class, 'index'])->name('listing-features.index');
     Route::post('listing-features', [AdminListingFeatureController::class, 'store'])->name('listing-features.store');
