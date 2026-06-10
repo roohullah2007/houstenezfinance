@@ -18,6 +18,7 @@ import {
     ExternalLink,
     User as UserIcon,
     Tag,
+    MailCheck,
 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { AppLayoutProps } from '@/types';
@@ -34,6 +35,7 @@ const navItems = [
     { title: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
     { title: 'Listing Features', href: '/admin/listing-features', icon: Tag },
     { title: 'Payment Settings', href: '/admin/payment-settings', icon: CreditCard },
+    { title: 'Email Settings', href: '/admin/email-settings', icon: MailCheck },
 ];
 
 function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -217,6 +219,15 @@ function AdminHeader({
                                     >
                                         <CreditCard className="h-4 w-4 text-gray-500" />
                                         Payment Settings
+                                    </Link>
+                                    <Link
+                                        href="/admin/email-settings"
+                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                        onClick={() => setMenuOpen(false)}
+                                        role="menuitem"
+                                    >
+                                        <MailCheck className="h-4 w-4 text-gray-500" />
+                                        Email Settings
                                     </Link>
                                     <Link
                                         href="/"
