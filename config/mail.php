@@ -127,4 +127,17 @@ return [
 
     'notify_to' => env('MAIL_NOTIFY_TO', 'houstonezfinance@gmail.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email Logo
+    |--------------------------------------------------------------------------
+    |
+    | Absolute URL of the logo shown in the email header. Email clients load
+    | this over the public internet, so it must always point at the live
+    | site regardless of the APP_URL of the server sending the email.
+    |
+    */
+
+    'logo_url' => env('MAIL_LOGO_URL', 'https://houstonezfinance.com/images/housten-logo-1.png'),
+
 ];
