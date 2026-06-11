@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Car, CheckCircle2, Clock, Plus, XCircle } from 'lucide-react';
+import { Car, CheckCircle2, Clock, MessageSquare, Plus, XCircle } from 'lucide-react';
 
 const ACCENT = '#F26B5E';
 
@@ -34,22 +34,40 @@ interface Listing {
     created_at: string;
 }
 
+interface Inquiry {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    message: string;
+    created_at: string;
+    car_listing: {
+        id: number;
+        title: string;
+        year: number;
+        make: string;
+        model: string;
+    } | null;
+}
+
 interface Props {
     stats: {
         total: number;
         approved: number;
         pending: number;
         rejected: number;
+        inquiries: number;
     };
     listings: Listing[];
+    recentInquiries: Inquiry[];
 }
 
-export default function UserDashboard({ stats, listings }: Props) {
+export default function UserDashboard({ stats, listings, recentInquiries }: Props) {
     const statCards = [
         { label: 'Total Listings', value: stats.total, icon: Car, iconBg: 'bg-blue-100', iconColor: 'text-blue-600' },
         { label: 'Approved', value: stats.approved, icon: CheckCircle2, iconBg: 'bg-green-100', iconColor: 'text-green-600' },
         { label: 'Pending Review', value: stats.pending, icon: Clock, iconBg: 'bg-yellow-100', iconColor: 'text-yellow-600' },
-        { label: 'Rejected', value: stats.rejected, icon: XCircle, iconBg: 'bg-red-100', iconColor: 'text-red-600' },
+        { label: 'Inquiries', value: stats.inquiries, icon: MessageSquare, iconBg: 'bg-purple-100', iconColor: 'text-purple-600' },
     ];
 
     return (
@@ -178,6 +196,49 @@ export default function UserDashboard({ stats, listings }: Props) {
                                     })}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+                </div>
+
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                    <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+                        <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                            <MessageSquare className="h-5 w-5" style={{ color: ACCENT }} />
+                            Recent Inquiries
+                        </h2>
+                        <Link href="/my-inquiries" className="text-sm font-semibold hover:underline" style={{ color: ACCENT }}>
+                            View All
+                        </Link>
+                    </div>
+
+                    {recentInquiries.length === 0 ? (
+                        <div className="px-6 py-8 text-center">
+                            <MessageSquare className="mx-auto h-8 w-8 text-gray-300" />
+                            <p className="mt-2 text-sm text-gray-500">
+                                No inquiries yet. When buyers ask about your listings, their messages will appear here.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-gray-100">
+                            {recentInquiries.map((inquiry) => (
+                                <div key={inquiry.id} className="px-4 py-3">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <p className="text-sm font-semibold text-gray-900">
+                                            {inquiry.name}
+                                            <span className="ml-2 font-normal text-gray-500">
+                                                on{' '}
+                                                {inquiry.car_listing
+                                                    ? `${inquiry.car_listing.year} ${inquiry.car_listing.make} ${inquiry.car_listing.model}`
+                                                    : 'a removed listing'}
+                                            </span>
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                            {new Date(inquiry.created_at).toLocaleDateString('en-US')}
+                                        </p>
+                                    </div>
+                                    <p className="mt-1 truncate text-sm text-gray-600">{inquiry.message}</p>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
