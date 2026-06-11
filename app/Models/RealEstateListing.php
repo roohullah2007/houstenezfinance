@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class RealEstateListing extends Model
 {
     protected $fillable = [
+        'user_id',
         'title',
         'slug',
         'developer',
@@ -86,6 +88,7 @@ class RealEstateListing extends Model
         if ($this->half_bathrooms > 0) {
             return "{$this->full_bathrooms}.5";
         }
+
         return (string) $this->full_bathrooms;
     }
 
@@ -95,6 +98,12 @@ class RealEstateListing extends Model
         if (empty($images)) {
             return null;
         }
+
         return $images[$this->main_image_index] ?? $images[0] ?? null;
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
