@@ -102,7 +102,7 @@ export function PublicHeader({ logoClassName, headerClassName }: PublicHeaderPro
                                 <DropdownMenuSeparator />
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/admin/dashboard" className="block w-full cursor-pointer">
+                                        <Link href={user.is_admin ? '/admin/dashboard' : '/dashboard'} className="block w-full cursor-pointer">
                                             <LayoutGrid className="mr-2" />
                                             Dashboard
                                         </Link>
@@ -212,7 +212,7 @@ export function PublicHeader({ logoClassName, headerClassName }: PublicHeaderPro
                                     <>
                                         <li className="mt-3 border-t border-white/10 pt-3">
                                             <Link
-                                                href="/admin/dashboard"
+                                                href={user.is_admin ? '/admin/dashboard' : '/dashboard'}
                                                 onClick={() => setMenuOpen(false)}
                                                 className="flex items-center gap-2 rounded-lg px-4 py-3 text-base font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
                                             >

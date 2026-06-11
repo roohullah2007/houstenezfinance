@@ -25,7 +25,7 @@ import type { AppLayoutProps } from '@/types';
 
 const ACCENT = '#F26B5E';
 
-const navItems = [
+const adminNavItems = [
     { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutGrid },
     { title: 'Car Listings', href: '/admin/car-listings', icon: Car },
     { title: 'Real Estate', href: '/admin/real-estate-listings', icon: Building2 },
@@ -38,10 +38,16 @@ const navItems = [
     { title: 'Email Settings', href: '/admin/email-settings', icon: MailCheck },
 ];
 
+const userNavItems = [
+    { title: 'My Dashboard', href: '/dashboard', icon: LayoutGrid },
+    { title: 'Sell Your Car', href: '/sell-your-car', icon: Car },
+];
+
 function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     const currentPath = usePage().url;
     const { auth } = usePage().props;
-    const user = (auth as { user?: { name?: string; email?: string } })?.user;
+    const user = (auth as { user?: { name?: string; email?: string; is_admin?: boolean } })?.user;
+    const navItems = user?.is_admin ? adminNavItems : userNavItems;
 
     return (
         <>
@@ -56,9 +62,9 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
                 <div className="flex flex-col h-full">
                     {/* Logo */}
                     <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2">
+                        <Link href={user?.is_admin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2">
                             <Shield className="w-8 h-8" style={{ color: ACCENT }} />
-                            <span className="text-white font-bold text-lg">Admin Panel</span>
+                            <span className="text-white font-bold text-lg">{user?.is_admin ? 'Admin Panel' : 'My Account'}</span>
                         </Link>
                         <button className="lg:hidden text-gray-400 hover:text-white" onClick={onClose}>
                             <X className="w-6 h-6" />
@@ -126,7 +132,7 @@ function AdminHeader({
     onMenuToggle: () => void;
 }) {
     const { auth } = usePage().props;
-    const user = (auth as { user?: { name?: string; email?: string } })?.user;
+    const user = (auth as { user?: { name?: string; email?: string; is_admin?: boolean } })?.user;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -211,24 +217,28 @@ function AdminHeader({
                                         <UserIcon className="h-4 w-4 text-gray-500" />
                                         Profile
                                     </Link>
-                                    <Link
-                                        href="/admin/payment-settings"
-                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                                        onClick={() => setMenuOpen(false)}
-                                        role="menuitem"
-                                    >
-                                        <CreditCard className="h-4 w-4 text-gray-500" />
-                                        Payment Settings
-                                    </Link>
-                                    <Link
-                                        href="/admin/email-settings"
-                                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                                        onClick={() => setMenuOpen(false)}
-                                        role="menuitem"
-                                    >
-                                        <MailCheck className="h-4 w-4 text-gray-500" />
-                                        Email Settings
-                                    </Link>
+                                    {user?.is_admin && (
+                                        <>
+                                            <Link
+                                                href="/admin/payment-settings"
+                                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                                onClick={() => setMenuOpen(false)}
+                                                role="menuitem"
+                                            >
+                                                <CreditCard className="h-4 w-4 text-gray-500" />
+                                                Payment Settings
+                                            </Link>
+                                            <Link
+                                                href="/admin/email-settings"
+                                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                                onClick={() => setMenuOpen(false)}
+                                                role="menuitem"
+                                            >
+                                                <MailCheck className="h-4 w-4 text-gray-500" />
+                                                Email Settings
+                                            </Link>
+                                        </>
+                                    )}
                                     <Link
                                         href="/"
                                         className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"

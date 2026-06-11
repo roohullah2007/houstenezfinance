@@ -29,6 +29,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_admin' => 'boolean',
         ];
+    }
+
+    // Deliberately not fillable: admin status is only granted directly
+    // (migration, tinker, or DB), never via mass assignment.
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 }
