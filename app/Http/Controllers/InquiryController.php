@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InquiryReceived;
 use App\Models\CarListing;
-use App\Models\ListingInquiry;
 use App\Support\OwnerNotifier;
 use App\Support\SpamProtection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class InquiryController extends Controller
@@ -54,6 +56,22 @@ class InquiryController extends Controller
             ],
             $validated['email'],
         );
+
+        // Also notify the seller directly, with reply-to set to the inquirer.
+        if (filter_var($carListing->email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($carListing->email)->send(new InquiryReceived(
+                    trim("{$carListing->first_name} {$carListing->last_name}") ?: 'there',
+                    $vehicle,
+                    $validated['name'],
+                    $validated['email'],
+                    $validated['phone'] ?? null,
+                    $validated['message'],
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('Seller inquiry email failed: '.$e->getMessage());
+            }
+        }
 
         return back()->with('success', 'Your message has been sent! We will contact you shortly.');
     }
