@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class SiteSetting extends Model
 {
@@ -28,11 +29,35 @@ class SiteSetting extends Model
                 try {
                     return Crypt::decryptString($row->value);
                 } catch (\Throwable) {
+                    Log::error("Site setting '{$key}' could not be decrypted — it was saved under a different APP_KEY. Re-save it in the admin settings.");
+
                     return $default;
                 }
             }
+
             return $row->value ?? $default;
         });
+    }
+
+    /**
+     * Whether an encrypted setting exists but can no longer be decrypted
+     * (typically because APP_KEY changed after it was saved).
+     */
+    public static function isUnreadable(string $key): bool
+    {
+        $row = static::where('key', $key)->first();
+
+        if (! $row || ! $row->is_encrypted || ! $row->value) {
+            return false;
+        }
+
+        try {
+            Crypt::decryptString($row->value);
+
+            return false;
+        } catch (\Throwable) {
+            return true;
+        }
     }
 
     public static function set(string $key, mixed $value, bool $encrypt = false): void
