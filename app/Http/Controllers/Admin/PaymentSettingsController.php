@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
+use App\Support\PayPalClient;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,6 +14,7 @@ class PaymentSettingsController extends Controller
     {
         $clientId = SiteSetting::get('paypal_client_id', '');
         $clientSecretSet = (bool) SiteSetting::get('paypal_client_secret');
+        $clientSecretUnreadable = SiteSetting::isUnreadable('paypal_client_secret');
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
 
         return Inertia::render('dashboard/payment-settings', [
@@ -20,6 +22,7 @@ class PaymentSettingsController extends Controller
                 'paypal_environment' => SiteSetting::get('paypal_environment', 'sandbox'),
                 'paypal_client_id' => $clientId,
                 'paypal_client_secret_set' => $clientSecretSet,
+                'paypal_client_secret_unreadable' => $clientSecretUnreadable,
                 'listing_fee' => $listingFee,
                 'currency' => SiteSetting::get('currency', 'usd'),
                 'payment_active' => $listingFee > 0 && ! empty($clientId) && $clientSecretSet,
@@ -50,7 +53,7 @@ class PaymentSettingsController extends Controller
 
     public function testConnection()
     {
-        $paypal = new \App\Support\PayPalClient();
+        $paypal = new PayPalClient;
 
         if (! $paypal->isConfigured()) {
             return response()->json([

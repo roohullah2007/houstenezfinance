@@ -6,6 +6,7 @@ interface Settings {
     paypal_environment: string;
     paypal_client_id: string;
     paypal_client_secret_set: boolean;
+    paypal_client_secret_unreadable?: boolean;
     listing_fee: number;
     currency: string;
     payment_active: boolean;
@@ -77,6 +78,20 @@ export default function PaymentSettings({ settings }: Props) {
                     <div className="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-3">
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                         <p className="text-sm font-medium text-green-800">{flash.success}</p>
+                    </div>
+                )}
+
+                {settings.paypal_client_secret_unreadable && (
+                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                        <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                        <div>
+                            <p className="font-semibold">Your saved PayPal Client Secret can no longer be read.</p>
+                            <p className="mt-1">
+                                It was saved under a different application key (this happens when the server's APP_KEY
+                                changes). Payments are disabled until you re-enter the Client Secret below and click
+                                Save, then use Test Connection to confirm.
+                            </p>
+                        </div>
                     </div>
                 )}
 
