@@ -15,6 +15,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FinanceApplicationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InquiryController;
+use App\Http\Controllers\MyListingsController;
 use App\Http\Controllers\RealEstateController;
 use App\Http\Controllers\SellYourCarPaymentController;
 use App\Http\Controllers\UserDashboardController;
@@ -49,6 +50,7 @@ Route::get('/real-estate/{realEstateListing:slug}', [RealEstateController::class
 Route::post('/real-estate/{realEstateListing:slug}/inquiry', [RealEstateController::class, 'storeInquiry'])->name('real-estate.inquiry');
 
 Route::middleware(['auth', 'verified'])->get('dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+Route::middleware(['auth', 'verified'])->get('my-listings', [MyListingsController::class, 'index'])->name('my-listings');
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

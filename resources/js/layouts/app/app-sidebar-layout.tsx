@@ -40,6 +40,7 @@ const adminNavItems = [
 
 const userNavItems = [
     { title: 'My Dashboard', href: '/dashboard', icon: LayoutGrid },
+    { title: 'My Listings', href: '/my-listings', icon: ClipboardList },
     { title: 'Sell Your Car', href: '/sell-your-car', icon: Car },
 ];
 
