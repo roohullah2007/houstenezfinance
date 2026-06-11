@@ -1,23 +1,8 @@
+import PublicFooter from '@/components/public-footer';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { PublicHeader } from '@/components/public-header';
 import { CaptchaField } from '@/components/captcha-field';
-import {
-    User,
-    Home,
-    Briefcase,
-    Users,
-    Car,
-    Phone,
-    Shield,
-    MapPin,
-    Mail,
-    Facebook,
-    Twitter,
-    Instagram,
-    ChevronRight,
-    CheckCircle2,
-    Lock,
-} from 'lucide-react';
+import { User, Home, Briefcase, Users, Car, Phone, Shield, ChevronRight, CheckCircle2, Lock } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
 const ACCENT = '#F26B5E';
@@ -93,6 +78,7 @@ export default function FinanceApplication() {
                 reset();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
+            onError: () => setSubmitted(false),
         });
     }
 
@@ -445,55 +431,7 @@ export default function FinanceApplication() {
                     </Section>
                 </form>
 
-                {/* Footer */}
-                <footer className="bg-[#0b1020] text-white">
-                    <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
-                        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-                            <div>
-                                <img src="/images/housten-logo-1.png" alt="Houston EZ Finance" className="h-14 w-auto" />
-                                <p className="mt-4 text-sm leading-relaxed text-white/60">Your trusted marketplace for quality vehicles, real estate, and hassle-free financing in Houston and beyond.</p>
-                                <div className="mt-5 flex items-center gap-3">
-                                    {[Facebook, Twitter, Instagram].map((Icon, i) => (
-                                        <a key={i} href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-[#F26B5E]"><Icon className="h-4 w-4" /></a>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">Quick Links</h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    <li><Link href="/car-listings" className="transition hover:text-[#F26B5E]">Car Listings</Link></li>
-                                    <li><Link href="/real-estate" className="transition hover:text-[#F26B5E]">Real Estate</Link></li>
-                                    <li><Link href="/finance-application" className="transition hover:text-[#F26B5E]">Finance Application</Link></li>
-                                    <li><Link href="/sell-your-car" className="transition hover:text-[#F26B5E]">Sell Your Car</Link></li>
-                                    <li><Link href="/categories" className="transition hover:text-[#F26B5E]">Categories</Link></li>
-                                    <li><Link href="/locations" className="transition hover:text-[#F26B5E]">Locations</Link></li>
-                                    <li><Link href="/dealers" className="transition hover:text-[#F26B5E]">Dealers</Link></li>
-                                    <li><Link href="/contact" className="transition hover:text-[#F26B5E]">Contact</Link></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">Services</h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    {['Auto Financing', 'Bad Credit Loans', 'First-Time Buyers', 'Trade-ins', 'In House Financing'].map((c) => (
-                                        <li key={c}>{c}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">Contact</h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082</li>
-                                    <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" />832-322-2354</li>
-                                    <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" />houstonezfinance@gmail.com</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="my-10 h-px bg-white/10" />
-                        <div className="flex flex-col items-center justify-between gap-4 text-sm text-white/50 sm:flex-row">
-                            <p>&copy; {new Date().getFullYear()} Houston EZ Finance. All rights reserved.</p>
-                        </div>
-                    </div>
-                </footer>
+                <PublicFooter />
             </div>
         </>
     );

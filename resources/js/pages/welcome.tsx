@@ -1,40 +1,12 @@
+import PublicFooter from '@/components/public-footer';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { PublicHeader } from '@/components/public-header';
-import {
-    Car,
-    Bus,
-    Caravan,
-    CarFront,
-    Star,
-    Search,
-    Fuel,
-    Gauge,
-    Settings2,
-    ShieldCheck,
-    BadgeDollarSign,
-    BadgeCheck,
-    Headphones,
-    MapPin,
-    Phone,
-    Mail,
-    Facebook,
-    Twitter,
-    Instagram,
-    ChevronRight,
-    Heart,
-} from 'lucide-react';
+import { Car, Bus, Caravan, CarFront, Star, Search, Fuel, Gauge, Settings2, ShieldCheck, BadgeDollarSign, BadgeCheck, Headphones, MapPin, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 const ACCENT = '#F26B5E';
 
@@ -736,107 +708,7 @@ export default function Welcome({
                     </section>
                 </main>
 
-                {/* Footer */}
-                <footer className="bg-[#0b1020] text-white">
-                    <div className="mx-auto max-w-[1408px] px-4 py-16 sm:px-6 lg:px-8">
-                        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-                            <div>
-                                <img
-                                    src="/images/housten-logo-1.png"
-                                    alt="Houston EZ Finance"
-                                    className="h-14 w-auto"
-                                />
-                                <p className="mt-4 text-sm leading-relaxed text-white/60">
-                                    Your trusted marketplace for quality vehicles and hassle-free
-                                    auto financing in Houston and beyond.
-                                </p>
-                                <div className="mt-5 flex items-center gap-3">
-                                    {[Facebook, Twitter, Instagram].map((Icon, i) => (
-                                        <a
-                                            key={i}
-                                            href="#"
-                                            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-[#F26B5E]"
-                                        >
-                                            <Icon className="h-4 w-4" />
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">
-                                    Quick Links
-                                </h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    {['About Us', 'Car Listings', 'Categories', 'Locations', 'Dealers', 'Blog', 'Contact'].map(
-                                        (l) => (
-                                            <li key={l}>
-                                                <a
-                                                    href="#"
-                                                    className="transition hover:text-[#F26B5E]"
-                                                >
-                                                    {l}
-                                                </a>
-                                            </li>
-                                        ),
-                                    )}
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">
-                                    Categories
-                                </h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    {['Sedan', 'SUV', 'Coupe', 'Convertible', 'Truck'].map((c) => (
-                                        <li key={c}>
-                                            <a
-                                                href="#"
-                                                className="transition hover:text-[#F26B5E]"
-                                            >
-                                                {c}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-semibold tracking-wider uppercase">
-                                    Contact
-                                </h4>
-                                <ul className="mt-5 space-y-3 text-sm text-white/60">
-                                    <li className="flex items-start gap-2">
-                                        <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                                        3505 S Dairy Ashford Rd # 115 717, Houston, TX 77082
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 shrink-0" />
-                                        832-322-2354
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <Mail className="h-4 w-4 shrink-0" />
-                                        houstonezfinance@gmail.com
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <Separator className="my-10 bg-white/10" />
-
-                        <div className="flex flex-col items-center justify-between gap-4 text-sm text-white/50 sm:flex-row">
-                            <p>© {new Date().getFullYear()} Houston EZ Finance. All rights reserved.</p>
-                            <div className="flex items-center gap-6">
-                                <a href="#" className="hover:text-white">
-                                    Privacy Policy
-                                </a>
-                                <a href="#" className="hover:text-white">
-                                    Terms of Service
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+                <PublicFooter />
             </div>
         </>
     );

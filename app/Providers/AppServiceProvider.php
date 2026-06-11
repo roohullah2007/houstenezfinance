@@ -83,11 +83,7 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(8)
-                ->letters()
-                ->numbers()
-            : null,
-        );
+        // Owner preference: accept any password of at least 4 characters.
+        Password::defaults(fn (): Password => Password::min(4));
     }
 }
