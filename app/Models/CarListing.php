@@ -67,4 +67,13 @@ class CarListing extends Model
     {
         return $this->hasMany(ListingInquiry::class);
     }
+
+    /**
+     * Listings that count as submitted: free listings, or paid ones.
+     * Listings still awaiting their listing-fee payment are excluded.
+     */
+    public function scopeSubmitted($query)
+    {
+        return $query->whereIn('payment_status', ['not_required', 'paid']);
+    }
 }

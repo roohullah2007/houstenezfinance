@@ -30,7 +30,7 @@ class UserDashboardController extends Controller
             ->get([
                 'id', 'title', 'year', 'make', 'model', 'vehicle_type', 'price',
                 'city', 'state', 'images', 'main_image_index', 'status',
-                'payment_status', 'payment_amount', 'created_at',
+                'payment_status', 'payment_amount', 'payment_token', 'created_at',
             ]);
 
         return Inertia::render('user-dashboard', [

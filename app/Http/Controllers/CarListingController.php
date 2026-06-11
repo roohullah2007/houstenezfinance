@@ -236,9 +236,17 @@ class CarListingController extends Controller
         $listingFee = (float) SiteSetting::get('listing_fee', 0);
         $clientId = SiteSetting::get('paypal_client_id');
         $clientSecret = SiteSetting::get('paypal_client_secret');
-        $paymentRequired = $listingFee > 0
-            && ! empty($clientId)
-            && ! empty($clientSecret);
+        $paymentRequired = $listingFee > 0;
+        $paymentConfigured = ! empty($clientId) && ! empty($clientSecret);
+
+        // A fee is set but checkout cannot run — refuse instead of accepting a free listing.
+        if ($paymentRequired && ! $paymentConfigured) {
+            Log::error('Sell Your Car submission blocked: listing fee is set but PayPal credentials are missing or unreadable.');
+
+            throw ValidationException::withMessages([
+                'payment' => 'Listing payments are temporarily unavailable. Please try again later or contact us.',
+            ]);
+        }
 
         if ($paymentRequired) {
             $validated['payment_token'] = Str::random(48);
@@ -248,39 +256,52 @@ class CarListingController extends Controller
 
         $listing = CarListing::create($validated);
 
-        $vehicle = trim("{$validated['year']} {$validated['make']} {$validated['model']}");
+        if ($paymentRequired) {
+            // The listing only counts as submitted once the fee is paid;
+            // notifications are sent after PayPal capture succeeds.
+            return redirect()->route('sell-your-car.payment', ['token' => $listing->payment_token]);
+        }
+
+        self::sendSubmissionNotifications($listing);
+
+        return redirect()->route('sell-your-car.thank-you');
+    }
+
+    /**
+     * Notify the owner and the seller that a listing was submitted.
+     * Called immediately for free listings, and after PayPal capture
+     * for paid ones.
+     */
+    public static function sendSubmissionNotifications(CarListing $listing): void
+    {
+        $vehicle = trim("{$listing->year} {$listing->make} {$listing->model}");
+        $sellerName = trim("{$listing->first_name} {$listing->last_name}");
 
         OwnerNotifier::send(
             'New Car Listing Submission',
-            trim("{$validated['first_name']} {$validated['last_name']} — {$vehicle}"),
+            trim("{$sellerName} — {$vehicle}"),
             [
-                'Seller Name' => trim("{$validated['first_name']} {$validated['last_name']}"),
-                'Email' => $validated['email'],
-                'Phone' => $validated['phone'],
+                'Seller Name' => $sellerName,
+                'Email' => $listing->email,
+                'Phone' => $listing->phone,
                 'Vehicle' => $vehicle,
-                'Title' => $validated['title'],
-                'Price' => $validated['price'],
-                'Mileage' => $validated['miles'],
-                'City/State' => trim("{$validated['city']}, {$validated['state']}", ', '),
-                'Payment' => $paymentRequired ? 'Listing fee pending' : 'No fee required',
+                'Title' => $listing->title,
+                'Price' => $listing->price,
+                'Mileage' => $listing->miles,
+                'City/State' => trim("{$listing->city}, {$listing->state}", ', '),
+                'Payment' => $listing->payment_status === 'paid'
+                    ? 'Listing fee paid'
+                    : 'No fee required',
             ],
-            $validated['email'],
+            $listing->email,
         );
 
-        $sellerName = trim("{$validated['first_name']} {$validated['last_name']}");
-
         try {
-            Mail::to($validated['email'])->send(
-                new ListingReceived($sellerName, $vehicle, $validated['title'], $paymentRequired)
+            Mail::to($listing->email)->send(
+                new ListingReceived($sellerName, $vehicle, $listing->title, false)
             );
         } catch (\Throwable $e) {
             Log::warning('Listing confirmation email failed: '.$e->getMessage());
         }
-
-        if ($paymentRequired) {
-            return redirect()->route('sell-your-car.payment', ['token' => $listing->payment_token]);
-        }
-
-        return redirect()->route('sell-your-car.thank-you');
     }
 }

@@ -12,12 +12,12 @@ class DashboardController extends Controller
     {
         return Inertia::render('dashboard', [
             'stats' => [
-                'total' => CarListing::count(),
-                'pending' => CarListing::where('status', 'pending')->count(),
-                'approved' => CarListing::where('status', 'approved')->count(),
-                'rejected' => CarListing::where('status', 'rejected')->count(),
+                'total' => CarListing::submitted()->count(),
+                'pending' => CarListing::submitted()->where('status', 'pending')->count(),
+                'approved' => CarListing::submitted()->where('status', 'approved')->count(),
+                'rejected' => CarListing::submitted()->where('status', 'rejected')->count(),
             ],
-            'recentListings' => CarListing::latest()->take(5)->get(),
+            'recentListings' => CarListing::submitted()->latest()->take(5)->get(),
         ]);
     }
 }

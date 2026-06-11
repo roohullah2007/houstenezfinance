@@ -30,6 +30,7 @@ interface Listing {
     status: string;
     payment_status: string | null;
     payment_amount: number | null;
+    payment_token: string | null;
     created_at: string;
 }
 
@@ -160,8 +161,13 @@ export default function UserDashboard({ stats, listings }: Props) {
                                                         <StatusIcon className="h-3 w-3" />
                                                         {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
                                                     </span>
-                                                    {listing.payment_status === 'pending' && listing.payment_amount ? (
-                                                        <p className="mt-1 text-xs text-amber-600">Listing fee unpaid</p>
+                                                    {listing.payment_status === 'pending' && listing.payment_token ? (
+                                                        <Link
+                                                            href={`/sell-your-car/payment/${listing.payment_token}`}
+                                                            className="mt-1 block text-xs font-semibold text-amber-600 underline hover:text-amber-700"
+                                                        >
+                                                            Listing fee unpaid — complete payment
+                                                        </Link>
                                                     ) : null}
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-500">
