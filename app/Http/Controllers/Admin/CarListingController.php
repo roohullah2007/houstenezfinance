@@ -12,7 +12,8 @@ class CarListingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = CarListing::query()->latest();
+        // Listings awaiting their listing-fee payment are not yet submitted.
+        $query = CarListing::query()->submitted()->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -22,12 +23,12 @@ class CarListingController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('make', 'like', "%{$search}%")
-                  ->orWhere('model', 'like', "%{$search}%")
-                  ->orWhere('vin', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('make', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('vin', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -156,12 +157,14 @@ class CarListingController extends Controller
     public function approve(CarListing $carListing)
     {
         $carListing->update(['status' => 'approved']);
+
         return back()->with('success', 'Listing approved successfully.');
     }
 
     public function reject(CarListing $carListing)
     {
         $carListing->update(['status' => 'rejected']);
+
         return back()->with('success', 'Listing rejected.');
     }
 
@@ -173,6 +176,7 @@ class CarListingController extends Controller
             }
         }
         $carListing->delete();
+
         return redirect()->route('admin.car-listings.index')->with('success', 'Listing deleted.');
     }
 }

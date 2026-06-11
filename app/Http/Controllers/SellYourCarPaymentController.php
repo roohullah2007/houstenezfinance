@@ -112,6 +112,9 @@ class SellYourCarPaymentController extends Controller
                     'paid_at' => now(),
                 ]);
 
+                // The listing is now officially submitted — notify owner and seller.
+                CarListingController::sendSubmissionNotifications($listing->fresh());
+
                 return response()->json(['status' => 'completed']);
             }
 

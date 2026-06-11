@@ -655,6 +655,11 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                         </div>
 
                         {/* Submit */}
+                        {(errors as Record<string, string>).payment && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-medium text-red-800">
+                                {(errors as Record<string, string>).payment}
+                            </div>
+                        )}
                         <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between sm:p-8">
                             <div className="text-center sm:text-left">
                                 <p className="text-sm font-medium text-gray-900">
@@ -662,7 +667,7 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                                 </p>
                                 <p className="text-xs text-gray-500">
                                     {paymentActive
-                                        ? `A ${formattedFee} listing fee will be collected via Stripe on the next step.`
+                                        ? `A ${formattedFee} listing fee will be collected via PayPal on the next step.`
                                         : 'Your listing will be reviewed and published within 24 hours.'}
                                 </p>
                             </div>
