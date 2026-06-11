@@ -17,6 +17,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\RealEstateController;
 use App\Http\Controllers\SellYourCarPaymentController;
+use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -47,7 +48,9 @@ Route::post('/real-estate', [RealEstateController::class, 'store'])->name('real-
 Route::get('/real-estate/{realEstateListing:slug}', [RealEstateController::class, 'show'])->name('real-estate.show');
 Route::post('/real-estate/{realEstateListing:slug}/inquiry', [RealEstateController::class, 'storeInquiry'])->name('real-estate.inquiry');
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified'])->get('dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('car-listings', [AdminCarListingController::class, 'index'])->name('car-listings.index');
     Route::get('car-listings/create', [AdminCarListingController::class, 'create'])->name('car-listings.create');
