@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface CaptchaData {
     captcha_token: string;
@@ -16,11 +16,22 @@ interface Props<T extends CaptchaData> {
 
 export function CaptchaField<T extends CaptchaData>({ data, setData, errors }: Props<T>) {
     const { captcha } = usePage<{ captcha: { token: string; question: string } }>().props;
+    const prevToken = useRef(captcha?.token);
 
+    // Keep the hidden token in sync even after a form reset() wipes it,
+    // so repeat submissions never go out with an empty captcha_token.
     useEffect(() => {
         if (captcha?.token && data.captcha_token !== captcha.token) {
             setData('captcha_token' as keyof T, captcha.token as T[keyof T]);
         }
+    }, [captcha?.token, data.captcha_token]);
+
+    // A new challenge means a new question — clear any stale typed answer.
+    useEffect(() => {
+        if (prevToken.current && captcha?.token && captcha.token !== prevToken.current && data.captcha_answer !== '') {
+            setData('captcha_answer' as keyof T, '' as T[keyof T]);
+        }
+        prevToken.current = captcha?.token;
     }, [captcha?.token]);
 
     return (
@@ -53,7 +64,11 @@ export function CaptchaField<T extends CaptchaData>({ data, setData, errors }: P
                     onChange={(e) => setData('captcha_answer' as keyof T, e.target.value as T[keyof T])}
                     className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-[#F26B5E] focus:outline-none focus:ring-2 focus:ring-[#F26B5E]/20"
                 />
-                {errors.captcha_answer && <p className="mt-1 text-xs text-red-500">{String(errors.captcha_answer)}</p>}
+                {(errors.captcha_answer || errors.captcha_token) && (
+                    <p className="mt-1 text-xs text-red-500">
+                        {String(errors.captcha_answer || 'Verification expired — please answer the new question and try again.')}
+                    </p>
+                )}
             </div>
         </>
     );
