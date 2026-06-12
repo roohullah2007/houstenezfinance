@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Http;
 class PayPalClient
 {
     protected string $environment;
+
     protected string $clientId;
+
     protected string $clientSecret;
 
     public function __construct()
@@ -39,7 +41,7 @@ class PayPalClient
             ]);
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to obtain PayPal access token.');
+            throw new \RuntimeException('Unable to obtain PayPal access token: HTTP '.$response->status().' '.substr($response->body(), 0, 300));
         }
 
         $token = $response->json('access_token');
@@ -54,6 +56,7 @@ class PayPalClient
     public function createOrder(float $amount, string $currency, string $description, string $customId): array
     {
         $response = Http::withToken($this->accessToken())
+            ->withHeaders(['Prefer' => 'return=representation'])
             ->acceptJson()
             ->post("{$this->apiBase()}/v2/checkout/orders", [
                 'intent' => 'CAPTURE',
@@ -70,7 +73,7 @@ class PayPalClient
             ]);
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to create PayPal order.');
+            throw new \RuntimeException('Unable to create PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500));
         }
 
         $order = $response->json();
@@ -84,13 +87,15 @@ class PayPalClient
 
     public function captureOrder(string $orderId): array
     {
+        // return=representation guarantees the response includes
+        // purchase_units[].payments.captures[] used for verification.
         $response = Http::withToken($this->accessToken())
-            ->withHeaders(['Content-Type' => 'application/json'])
+            ->withHeaders(['Content-Type' => 'application/json', 'Prefer' => 'return=representation'])
             ->acceptJson()
             ->post("{$this->apiBase()}/v2/checkout/orders/{$orderId}/capture");
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to capture PayPal order.');
+            throw new \RuntimeException('Unable to capture PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500));
         }
 
         return $response->json();

@@ -112,8 +112,13 @@ class SellYourCarPaymentController extends Controller
                     'paid_at' => now(),
                 ]);
 
-                // The listing is now officially submitted — notify owner and seller.
-                CarListingController::sendSubmissionNotifications($listing->fresh());
+                // The payment is captured — nothing past this point may fail the
+                // response, or the buyer would see an error despite being charged.
+                try {
+                    CarListingController::sendSubmissionNotifications($listing->fresh());
+                } catch (\Throwable $e) {
+                    Log::error('Post-payment notifications failed for listing '.$listing->id.': '.$e->getMessage());
+                }
 
                 return response()->json(['status' => 'completed']);
             }
