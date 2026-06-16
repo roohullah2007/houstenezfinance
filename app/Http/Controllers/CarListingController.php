@@ -177,8 +177,18 @@ class CarListingController extends Controller
 
     public function store(Request $request)
     {
+        // Honeypot: a real, hidden-from-everyone field. Bots fill it; humans
+        // (and now, autofill/password managers) don't. Reject with an error
+        // rather than a fake "success" — a tripped honeypot must never render
+        // the inline "Listing Submitted Successfully!" banner, which previously
+        // let a filled field skip listing creation, payment AND emails while
+        // still telling the user they were done.
         if (filled($request->input('website'))) {
-            return redirect()->route('sell-your-car')->with('success', 'Your listing has been submitted for review!');
+            Log::info('Sell Your Car submission rejected by honeypot.');
+
+            throw ValidationException::withMessages([
+                'captcha_answer' => 'We could not verify your submission. Please try again.',
+            ]);
         }
 
         $validated = $request->validate([

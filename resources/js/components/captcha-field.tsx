@@ -36,18 +36,20 @@ export function CaptchaField<T extends CaptchaData>({ data, setData, errors }: P
 
     return (
         <>
-            {/* Honeypot — bots fill it, humans don't see it */}
+            {/* Honeypot — bots fill it, humans don't see it. Hidden from
+                assistive tech AND from browser autofill/password managers
+                (which happily fill a stray text input named "website" and
+                would otherwise trip the trap for real users). */}
             <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
-                <label>
-                    Leave this field empty
-                    <input
-                        type="text"
-                        tabIndex={-1}
-                        autoComplete="off"
-                        value={data.website}
-                        onChange={(e) => setData('website' as keyof T, e.target.value as T[keyof T])}
-                    />
-                </label>
+                <input
+                    type="text"
+                    name="contact_url_hp"
+                    tabIndex={-1}
+                    autoComplete="new-password"
+                    aria-hidden="true"
+                    value={data.website}
+                    onChange={(e) => setData('website' as keyof T, e.target.value as T[keyof T])}
+                />
             </div>
 
             <div>
