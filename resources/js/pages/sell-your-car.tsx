@@ -157,9 +157,19 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                 reset();
                 setPreviewImages([]);
             },
-            onError: () => setSubmitted(false),
+            onError: () => {
+                setSubmitted(false);
+                // The form is long — surface the first validation error so the
+                // submit button doesn't look dead when something above is missing.
+                requestAnimationFrame(() => {
+                    const firstError = document.querySelector('.text-red-500');
+                    firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            },
         });
     }
+
+    const errorCount = Object.keys(errors).length;
 
     return (
         <>
@@ -210,8 +220,8 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                                 <p className="mt-2 text-xs leading-relaxed text-gray-500">
                                     We charge a small fee of {formattedFee} to keep spammers out and serious sellers and buyers in.
                                     Your listing will be seen by hundreds to thousands of customers. After you submit the form below,
-                                    you'll be taken to a secure Stripe checkout to complete payment — card details are handled by
-                                    Stripe and never stored on our servers.
+                                    you'll be taken to a secure PayPal checkout to complete payment — card details are handled by
+                                    PayPal and never stored on our servers.
                                 </p>
                             </div>
                             <div className="flex flex-col items-center rounded-xl border-2 border-[#F26B5E] bg-white px-6 py-4 shadow-lg">
@@ -658,6 +668,11 @@ export default function SellYourCar({ payment, availableFeatures = [] }: Props) 
                         {(errors as Record<string, string>).payment && (
                             <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-medium text-red-800">
                                 {(errors as Record<string, string>).payment}
+                            </div>
+                        )}
+                        {errorCount > 0 && !(errors as Record<string, string>).payment && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-medium text-red-800">
+                                Please fix the {errorCount === 1 ? 'highlighted field' : `${errorCount} highlighted fields`} above, then continue.
                             </div>
                         )}
                         <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between sm:p-8">

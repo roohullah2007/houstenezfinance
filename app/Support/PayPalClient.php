@@ -41,7 +41,15 @@ class PayPalClient
             ]);
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to obtain PayPal access token: HTTP '.$response->status().' '.substr($response->body(), 0, 300));
+            $body = $response->json() ?? [];
+
+            // invalid_client means the client ID/secret are wrong for this
+            // environment — e.g. sandbox credentials with paypal_environment=live.
+            $message = ($body['error'] ?? null) === 'invalid_client'
+                ? "PayPal rejected the API credentials (invalid_client): the client ID/secret do not belong to the configured '{$this->environment}' environment."
+                : 'Unable to obtain PayPal access token: HTTP '.$response->status().' '.substr($response->body(), 0, 300);
+
+            throw new PayPalApiException($response->status(), $body, $message);
         }
 
         $token = $response->json('access_token');
@@ -73,7 +81,11 @@ class PayPalClient
             ]);
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to create PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500));
+            throw new PayPalApiException(
+                $response->status(),
+                $response->json() ?? [],
+                'Unable to create PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500),
+            );
         }
 
         $order = $response->json();
@@ -89,13 +101,46 @@ class PayPalClient
     {
         // return=representation guarantees the response includes
         // purchase_units[].payments.captures[] used for verification.
+        // The capture endpoint takes no parameters, but declaring a JSON
+        // content-type with an empty body makes PayPal reject it as
+        // MALFORMED_REQUEST_JSON — so send a well-formed empty object.
         $response = Http::withToken($this->accessToken())
-            ->withHeaders(['Content-Type' => 'application/json', 'Prefer' => 'return=representation'])
+            ->withHeaders(['Prefer' => 'return=representation'])
             ->acceptJson()
+            ->withBody('{}', 'application/json')
             ->post("{$this->apiBase()}/v2/checkout/orders/{$orderId}/capture");
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Unable to capture PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500));
+            $body = $response->json() ?? [];
+
+            // Idempotency: a retried capture of an already-captured order is a
+            // success — fetch the order so the caller can verify the capture.
+            if (($body['details'][0]['issue'] ?? null) === 'ORDER_ALREADY_CAPTURED') {
+                return $this->getOrder($orderId);
+            }
+
+            throw new PayPalApiException(
+                $response->status(),
+                $body,
+                'Unable to capture PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500),
+            );
+        }
+
+        return $response->json();
+    }
+
+    public function getOrder(string $orderId): array
+    {
+        $response = Http::withToken($this->accessToken())
+            ->acceptJson()
+            ->get("{$this->apiBase()}/v2/checkout/orders/{$orderId}");
+
+        if (! $response->successful()) {
+            throw new PayPalApiException(
+                $response->status(),
+                $response->json() ?? [],
+                'Unable to fetch PayPal order: HTTP '.$response->status().' '.substr($response->body(), 0, 500),
+            );
         }
 
         return $response->json();

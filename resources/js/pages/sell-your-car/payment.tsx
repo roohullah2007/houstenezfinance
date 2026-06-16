@@ -65,7 +65,7 @@ export default function SellYourCarPayment({ token, paypal_client_id, amount, cu
                         const data = await res.json();
                         return data.id;
                     },
-                    onApprove: async () => {
+                    onApprove: async (_data: any, actions: any) => {
                         try {
                             const res = await fetch(`/sell-your-car/payment/${token}/capture`, {
                                 method: 'POST',
@@ -75,6 +75,12 @@ export default function SellYourCarPayment({ token, paypal_client_id, amount, cu
                             const data = await res.json();
                             if (res.ok && data.status === 'completed') {
                                 router.visit('/sell-your-car/thank-you');
+                            } else if (data.code === 'INSTRUMENT_DECLINED') {
+                                // PayPal-recommended recovery: reopen the popup so the
+                                // buyer can pick a different funding source.
+                                setError(data.error || 'Your payment method was declined. Please try a different way to pay.');
+
+                                return actions.restart();
                             } else {
                                 setError(data.error || 'Payment could not be verified.');
                             }

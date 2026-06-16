@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CarListing;
 use App\Models\SiteSetting;
+use App\Support\PayPalApiException;
 use App\Support\PayPalClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -63,6 +64,14 @@ class SellYourCarPaymentController extends Controller
             $listing->update(['paypal_order_id' => $order['id']]);
 
             return response()->json(['id' => $order['id']]);
+        } catch (PayPalApiException $e) {
+            Log::error('PayPal createOrder failed for listing '.$listing->id.': '.$e->getMessage(), [
+                'listing_id' => $listing->id,
+                'paypal_status' => $e->status,
+                'paypal_response' => $e->body,
+            ]);
+
+            return response()->json(['error' => 'Could not start PayPal checkout.'], 502);
         } catch (\Throwable $e) {
             Log::error('PayPal createOrder failed for listing '.$listing->id.': '.$e->getMessage());
 
@@ -126,6 +135,28 @@ class SellYourCarPaymentController extends Controller
             Log::warning('PayPal capture not valid for listing '.$listing->id.': status='.$captureStatus.', amount='.$capturedAmount.', expected='.$expectedAmount.', custom_id='.$customId);
 
             return response()->json(['error' => 'Payment not completed.'], 422);
+        } catch (PayPalApiException $e) {
+            Log::error('PayPal capture failed for listing '.$listing->id.': '.$e->getMessage(), [
+                'listing_id' => $listing->id,
+                'paypal_order_id' => $orderId,
+                'paypal_status' => $e->status,
+                'paypal_response' => $e->body,
+            ]);
+
+            // The buyer's funding source was declined — tell the frontend so the
+            // PayPal buttons can call actions.restart() and let them pick another.
+            if ($e->isInstrumentDeclined()) {
+                return response()->json([
+                    'error' => 'Your payment method was declined. Please try a different way to pay.',
+                    'code' => 'INSTRUMENT_DECLINED',
+                ], 422);
+            }
+
+            if ($e->isCredentialError()) {
+                return response()->json(['error' => 'Payments are misconfigured on our side. Please contact support — you have not been charged.'], 502);
+            }
+
+            return response()->json(['error' => 'Could not verify PayPal payment.'], 502);
         } catch (\Throwable $e) {
             Log::error('PayPal capture failed for listing '.$listing->id.': '.$e->getMessage());
 
