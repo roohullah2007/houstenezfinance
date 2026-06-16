@@ -61,7 +61,19 @@ export default function SellYourCarPayment({ token, paypal_client_id, amount, cu
                             credentials: 'same-origin',
                             headers: fetchHeaders(),
                         });
-                        if (!res.ok) throw new Error((await res.json()).error || 'Could not start PayPal checkout.');
+                        if (!res.ok) {
+                            const detail = await res.text();
+                            // Surface the server's error detail so the real cause is
+                            // visible in the console even though the SDK swallows it.
+                            console.error(`createOrder failed: HTTP ${res.status}`, detail);
+                            let message = 'Could not start PayPal checkout.';
+                            try {
+                                message = JSON.parse(detail).error || message;
+                            } catch {
+                                // non-JSON body (e.g. an HTML error page) — keep default
+                            }
+                            throw new Error(message);
+                        }
                         const data = await res.json();
                         return data.id;
                     },
@@ -88,8 +100,17 @@ export default function SellYourCarPayment({ token, paypal_client_id, amount, cu
                             setError('Payment could not be verified. Please try again.');
                         }
                     },
-                    onError: () => {
-                        setError('Something went wrong with PayPal. Please try again.');
+                    onError: (err: any) => {
+                        // The PayPal SDK normally swallows the underlying error.
+                        // Log the full object so the real cause is visible in the
+                        // browser console (DevTools) even without server access.
+                        console.error('PayPal onError:', err);
+                        const detail = err?.message || (typeof err === 'string' ? err : '');
+                        setError(
+                            detail
+                                ? `Something went wrong with PayPal: ${detail}`
+                                : 'Something went wrong with PayPal. Please try again.',
+                        );
                     },
                 })
                 .render(buttonsRef.current)
