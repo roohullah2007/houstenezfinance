@@ -9,6 +9,7 @@ const ACCENT = '#F26B5E';
 
 interface CarListing {
     id: number;
+    slug: string;
     title: string;
     state: string;
     city: string;
@@ -56,7 +57,7 @@ export default function ShowCarListing({ listing, availableFeatures = [] }: Prop
 
     function handleInquirySubmit(e: FormEvent) {
         e.preventDefault();
-        post(`/car-listings/${listing.id}/inquiry`, {
+        post(`/car-listings/${listing.slug}/inquiry`, {
             preserveScroll: true,
             onSuccess: () => {
                 setSubmitted(true);

@@ -10,6 +10,7 @@ const ACCENT = '#F26B5E';
 
 interface CarListing {
     id: number;
+    slug: string;
     title: string;
     state: string;
     city: string;
@@ -94,6 +95,7 @@ interface SuggestionItem {
     label: string;
     value: string;
     id?: number;
+    slug?: string;
 }
 
 interface SuggestionResponse {
@@ -267,8 +269,8 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
 
     function selectSuggestion(item: SuggestionItem) {
         setShowSuggestions(false);
-        if (item.type === 'listing' && item.id) {
-            router.get(`/car-listings/${item.id}`);
+        if (item.type === 'listing' && item.slug) {
+            router.get(`/car-listings/${item.slug}`);
             return;
         }
         if (item.type === 'make') {
@@ -917,7 +919,7 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                     return (
                                         <Link
                                             key={car.id}
-                                            href={`/car-listings/${car.id}`}
+                                            href={`/car-listings/${car.slug}`}
                                             className="group block overflow-hidden rounded-xl border border-gray-200 bg-white text-slate-900 transition-shadow hover:shadow-lg"
                                         >
                                             <div className="relative" style={{ height: 180 }}>

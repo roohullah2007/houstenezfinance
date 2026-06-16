@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class CarListing extends Model
 {
@@ -14,6 +15,7 @@ class CarListing extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'slug',
         'state',
         'city',
         'make',
@@ -56,6 +58,40 @@ class CarListing extends Model
             'payment_amount' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
+    }
+
+    public static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function (self $listing) {
+            if (empty($listing->slug)) {
+                $listing->slug = static::uniqueSlug($listing->slugSource(), $listing->id);
+            }
+        });
+    }
+
+    protected function slugSource(): string
+    {
+        return trim("{$this->year} {$this->make} {$this->model} {$this->title}");
+    }
+
+    protected static function uniqueSlug(string $source, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($source) ?: 'listing';
+        $slug = $base;
+        $i = 2;
+
+        while (static::query()
+            ->where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()
+        ) {
+            $slug = "{$base}-{$i}";
+            $i++;
+        }
+
+        return $slug;
     }
 
     public function user(): BelongsTo

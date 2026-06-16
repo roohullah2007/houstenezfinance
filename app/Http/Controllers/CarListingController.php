@@ -107,8 +107,14 @@ class CarListingController extends Controller
         $titles = (clone $approved)
             ->where('title', 'like', $like)
             ->limit(5)
-            ->pluck('id', 'title')
-            ->map(fn ($id, $title) => ['type' => 'listing', 'label' => $title, 'value' => $title, 'id' => $id])
+            ->get(['id', 'title', 'slug'])
+            ->map(fn ($listing) => [
+                'type' => 'listing',
+                'label' => $listing->title,
+                'value' => $listing->title,
+                'id' => $listing->id,
+                'slug' => $listing->slug,
+            ])
             ->values();
 
         $makes = (clone $approved)
@@ -287,8 +293,10 @@ class CarListingController extends Controller
         $vehicle = trim("{$listing->year} {$listing->make} {$listing->model}");
         $sellerName = trim("{$listing->first_name} {$listing->last_name}");
 
+        // FormSubmissionNotification already prefixes the subject with "New ",
+        // so the form type must not repeat it (was "New New Car Listing...").
         OwnerNotifier::send(
-            'New Car Listing Submission',
+            'Car Listing Submission',
             trim("{$sellerName} — {$vehicle}"),
             [
                 'Seller Name' => $sellerName,
