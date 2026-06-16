@@ -101,21 +101,64 @@ class FinanceApplicationController extends Controller
 
         FinanceApplication::create($validated);
 
+        $fullName = trim("{$validated['first_name']} {$validated['last_name']}");
+        $middleName = $validated['middle_name'] ?? null;
+        if ($middleName) {
+            $fullName = trim("{$validated['first_name']} {$middleName} {$validated['last_name']}");
+        }
+
         OwnerNotifier::send(
             'Finance Application',
-            trim("{$validated['first_name']} {$validated['last_name']}"),
+            $fullName,
             [
-                'Name' => trim("{$validated['first_name']} {$validated['last_name']}"),
+                // Applicant
+                'Name' => $fullName,
                 'Email' => $validated['email'],
                 'Phone' => $validated['phone'],
+                'Alternate Phone' => $validated['alt_phone'] ?? null,
                 'Date of Birth' => $validated['date_of_birth'] ?? null,
+                'SSN' => $validated['ssn'] ?? null,
+                'Driver License #' => $validated['license_number'] ?? null,
+                'License State' => $validated['license_state'] ?? null,
                 'Marital Status' => $validated['marital_status'] ?? null,
-                'Address' => trim(($validated['current_address'] ?? '').', '.($validated['current_city'] ?? '').', '.($validated['current_state'] ?? '').' '.($validated['current_zip'] ?? ''), ', '),
+
+                // Current residence
+                'Current Address' => trim(($validated['current_address'] ?? '').', '.($validated['current_city'] ?? '').', '.($validated['current_state'] ?? '').' '.($validated['current_zip'] ?? ''), ', '),
+                'Time at Current Address' => trim(($validated['current_years_at_address'] ?? 0).' yr '.($validated['current_months_at_address'] ?? 0).' mo'),
+                'Housing Status' => $validated['housing_status'] ?? null,
+                'Monthly Housing Payment' => $validated['monthly_housing_payment'] ?? null,
+
+                // Previous residence
+                'Previous Address' => trim(($validated['previous_address'] ?? '').', '.($validated['previous_city'] ?? '').', '.($validated['previous_state'] ?? '').' '.($validated['previous_zip'] ?? ''), ', '),
+
+                // Employment
                 'Employer' => $validated['employer_name'] ?? null,
+                'Job Title' => $validated['job_title'] ?? null,
+                'Employer Phone' => $validated['employer_phone'] ?? null,
+                'Time Employed' => trim(($validated['years_employed'] ?? 0).' yr '.($validated['months_employed'] ?? 0).' mo'),
                 'Monthly Income' => $validated['monthly_income'] ?? null,
+                'Other Monthly Income' => $validated['other_monthly_income'] ?? null,
+                'Other Income Source' => $validated['other_income_source'] ?? null,
+                'Previous Employer' => $validated['previous_employer_name'] ?? null,
+                'Previous Job Title' => $validated['previous_job_title'] ?? null,
+
+                // Co-applicant
+                'Has Co-Applicant' => $validated['has_co_applicant'] ? 'Yes' : 'No',
+                'Co-Applicant Name' => trim(($validated['co_first_name'] ?? '').' '.($validated['co_last_name'] ?? '')),
+                'Co-Applicant Relationship' => $validated['co_relationship'] ?? null,
+                'Co-Applicant Email' => $validated['co_email'] ?? null,
+                'Co-Applicant Phone' => $validated['co_phone'] ?? null,
+                'Co-Applicant Date of Birth' => $validated['co_date_of_birth'] ?? null,
+                'Co-Applicant SSN' => $validated['co_ssn'] ?? null,
+                'Co-Applicant Employer' => $validated['co_employer_name'] ?? null,
+                'Co-Applicant Monthly Income' => $validated['co_monthly_income'] ?? null,
+
+                // Vehicle
                 'Vehicle of Interest' => $validated['vehicle_of_interest'] ?? null,
                 'Down Payment' => $validated['down_payment'] ?? null,
-                'Has Co-Applicant' => $validated['has_co_applicant'] ? 'Yes' : 'No',
+                'Trade-In Vehicle' => $validated['trade_in_vehicle'] ?? null,
+
+                'Credit Check Authorized' => $validated['credit_check_authorized'] ? 'Yes' : 'No',
             ],
             $validated['email'],
         );
