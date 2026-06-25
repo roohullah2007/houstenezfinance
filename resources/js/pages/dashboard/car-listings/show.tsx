@@ -239,7 +239,7 @@ export default function ShowCarListing({ listing }: Props) {
                             <div className="flex items-center gap-2">
                                 <DollarSign className="h-6 w-6 text-green-600" />
                                 <span className="text-3xl font-bold text-gray-900">
-                                    ${Number(listing.price).toLocaleString()}
+                                    {listing.price ? `$${Number(listing.price).toLocaleString()}` : 'Email for Price'}
                                 </span>
                             </div>
                             <p className="mt-1 text-sm text-gray-500">{listing.city}, {listing.state}</p>

@@ -17,7 +17,7 @@ interface CarListing {
     make: string;
     model: string;
     year: number;
-    price: string;
+    price: string | null;
     miles: number;
     transmission: string;
     vehicle_type: string;
@@ -59,16 +59,6 @@ interface Props {
     listings: PaginatedListings;
     filters: Filters;
     filterMeta: FilterMeta;
-}
-
-function timeAgo(date: string): string {
-    const diff = Date.now() - new Date(date).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Today';
-    if (days === 1) return '1 day ago';
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    return `${Math.floor(days / 30)} months ago`;
 }
 
 function formatMoney(n: number | string): string {
@@ -935,9 +925,6 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                                         <Car className="h-10 w-10 text-gray-300" />
                                                     </div>
                                                 )}
-                                                <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-                                                    {timeAgo(car.created_at)}
-                                                </div>
                                                 {car.video_url && (
                                                     <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white">
                                                         <Play className="h-2.5 w-2.5 fill-white" />
@@ -948,7 +935,7 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                             <div className="p-3">
                                                 <h3 className="truncate text-sm font-semibold text-slate-900">{car.title}</h3>
                                                 <p className="mt-1 text-lg font-bold" style={{ color: ACCENT }}>
-                                                    ${Number(car.price).toLocaleString()}
+                                                    {car.price ? `$${Number(car.price).toLocaleString()}` : 'Email for Price'}
                                                 </p>
                                                 <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[12px] text-gray-500">
                                                     <span><strong className="text-gray-700">{Number(car.miles).toLocaleString()}</strong> mi</span>
@@ -967,23 +954,6 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                         </Link>
                                     );
                                 })}
-                            </div>
-
-                            {/* Featured Video Tour */}
-                            <div className="mt-12">
-                                <div className="mb-4 flex items-center gap-2">
-                                    <Play className="h-5 w-5 fill-current" style={{ color: ACCENT }} />
-                                    <h2 className="text-lg font-semibold text-slate-900">Featured Video Tour</h2>
-                                </div>
-                                <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: 'min(40%, 480px)' }}>
-                                    <iframe
-                                        className="absolute inset-0 h-full w-full border-0"
-                                        src="https://www.youtube.com/embed/kJ0XcrUckUs"
-                                        title="Vehicle Video Tour"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    />
-                                </div>
                             </div>
 
                             {/* Pagination */}
@@ -1008,6 +978,23 @@ export default function CarListings({ listings, filters, filterMeta }: Props) {
                                     ))}
                                 </div>
                             )}
+
+                            {/* Featured Video Tour */}
+                            <div className="mt-12">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Play className="h-5 w-5 fill-current" style={{ color: ACCENT }} />
+                                    <h2 className="text-lg font-semibold text-slate-900">Featured Video Tour</h2>
+                                </div>
+                                <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-lg" style={{ paddingBottom: 'min(40%, 480px)' }}>
+                                    <iframe
+                                        className="absolute inset-0 h-full w-full border-0"
+                                        src="https://www.youtube.com/embed/kJ0XcrUckUs"
+                                        title="Vehicle Video Tour"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                    />
+                                </div>
+                            </div>
                         </>
                     )}
                 </div>
