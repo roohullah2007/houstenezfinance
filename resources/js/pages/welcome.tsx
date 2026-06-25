@@ -480,48 +480,6 @@ export default function Welcome({
                 </section>
 
                 <main>
-                    {/* Popular body types */}
-                    <section id="categories" className="mx-auto max-w-[1408px] px-4 py-20 sm:px-6 lg:px-8">
-                        <div className="mb-10 text-center">
-                            <p className="text-sm font-semibold tracking-wider text-[#F26B5E] uppercase">
-                                Browse Categories
-                            </p>
-                            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                                Popular car body types
-                            </h2>
-                            <p className="mt-3 text-slate-600">
-                                Explore cars by the body style you love the most.
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-                            {categories.map((cat) => {
-                                const Icon = iconMap[cat.icon] || Car;
-                                return (
-                                    <Link
-                                        key={cat.name}
-                                        href={`/car-listings?vehicle_type=${encodeURIComponent(cat.vehicle_type)}`}
-                                    >
-                                        <Card
-                                            style={{ backgroundColor: '#f1f5f9' }}
-                                            className="group cursor-pointer rounded-xl border border-slate-200 text-slate-900 transition-all hover:-translate-y-1 hover:border-[#F26B5E] hover:shadow-xl"
-                                        >
-                                            <CardContent className="flex flex-col items-center p-6 text-center">
-                                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm transition group-hover:bg-[#F26B5E]/10">
-                                                    <Icon className="h-8 w-8 text-slate-700 transition group-hover:text-[#F26B5E]" />
-                                                </div>
-                                                <h3 className="font-semibold text-slate-900">{cat.name}</h3>
-                                                <p className="mt-1 text-sm text-slate-500">
-                                                    {cat.offers} {cat.offers === 1 ? 'offer' : 'offers'}
-                                                </p>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </section>
-
                     {/* Featured Listings */}
                     <section id="listings" className="bg-slate-50 py-20">
                         <div className="mx-auto max-w-[1408px] px-4 sm:px-6 lg:px-8">
@@ -534,19 +492,19 @@ export default function Welcome({
                                         Latest featured listings
                                     </h2>
                                 </div>
-                                <a
-                                    href="#"
+                                <Link
+                                    href="/car-listings"
                                     className="inline-flex items-center gap-1 text-sm font-semibold text-[#F26B5E] hover:underline"
                                 >
                                     View all listings <ChevronRight className="h-4 w-4" />
-                                </a>
+                                </Link>
                             </div>
 
                             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {featuredListings.map((car) => (
-                                    <a
+                                    <Link
                                         key={car.title}
-                                        href="#"
+                                        href="/car-listings"
                                         style={{ backgroundColor: '#ffffff' }}
                                         className="group block overflow-hidden rounded-2xl border border-gray-200 text-slate-900 shadow-sm transition-shadow hover:shadow-xl"
                                     >
@@ -557,12 +515,6 @@ export default function Welcome({
                                                 loading="lazy"
                                                 className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                             />
-                                            <div
-                                                className="absolute top-3 left-3 rounded-full px-3 py-1 text-[11px] font-semibold text-white"
-                                                style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-                                            >
-                                                {car.posted}
-                                            </div>
                                             <div
                                                 className="absolute top-3 right-14 rounded-full px-3 py-1 text-[11px] font-semibold text-white"
                                                 style={{ backgroundColor: ACCENT }}
@@ -620,9 +572,51 @@ export default function Welcome({
                                                 {car.dealer}
                                             </p>
                                         </div>
-                                    </a>
+                                    </Link>
                                 ))}
                             </div>
+                        </div>
+                    </section>
+
+                    {/* Popular body types */}
+                    <section id="categories" className="mx-auto max-w-[1408px] px-4 py-20 sm:px-6 lg:px-8">
+                        <div className="mb-10 text-center">
+                            <p className="text-sm font-semibold tracking-wider text-[#F26B5E] uppercase">
+                                Browse Categories
+                            </p>
+                            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                                Popular car body types
+                            </h2>
+                            <p className="mt-3 text-slate-600">
+                                Explore cars by the body style you love the most.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+                            {categories.map((cat) => {
+                                const Icon = iconMap[cat.icon] || Car;
+                                return (
+                                    <Link
+                                        key={cat.name}
+                                        href={`/car-listings?vehicle_type=${encodeURIComponent(cat.vehicle_type)}`}
+                                    >
+                                        <Card
+                                            style={{ backgroundColor: '#f1f5f9' }}
+                                            className="group cursor-pointer rounded-xl border border-slate-200 text-slate-900 transition-all hover:-translate-y-1 hover:border-[#F26B5E] hover:shadow-xl"
+                                        >
+                                            <CardContent className="flex flex-col items-center p-6 text-center">
+                                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm transition group-hover:bg-[#F26B5E]/10">
+                                                    <Icon className="h-8 w-8 text-slate-700 transition group-hover:text-[#F26B5E]" />
+                                                </div>
+                                                <h3 className="font-semibold text-slate-900">{cat.name}</h3>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    {cat.offers} {cat.offers === 1 ? 'offer' : 'offers'}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </section>
 

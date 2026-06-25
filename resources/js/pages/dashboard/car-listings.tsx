@@ -230,7 +230,7 @@ export default function CarListings({ listings, filters }: Props) {
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3 font-semibold text-gray-900">
-                                                    ${Number(listing.price).toLocaleString()}
+                                                    {listing.price ? `$${Number(listing.price).toLocaleString()}` : '—'}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <p className="text-gray-900">{listing.first_name} {listing.last_name}</p>

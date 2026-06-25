@@ -44,12 +44,13 @@ class CarListingController extends Controller
             $query->where('model', $request->model);
         }
 
+        // Cars without a price ("Email for Price") stay visible even under a price filter.
         if ($request->filled('min_price')) {
-            $query->where('price', '>=', (float) $request->min_price);
+            $query->where(fn ($q) => $q->where('price', '>=', (float) $request->min_price)->orWhereNull('price'));
         }
 
         if ($request->filled('max_price')) {
-            $query->where('price', '<=', (float) $request->max_price);
+            $query->where(fn ($q) => $q->where('price', '<=', (float) $request->max_price)->orWhereNull('price'));
         }
 
         if ($request->filled('min_year')) {

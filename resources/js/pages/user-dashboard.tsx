@@ -22,7 +22,7 @@ interface Listing {
     make: string;
     model: string;
     vehicle_type: string;
-    price: number;
+    price: number | null;
     city: string;
     state: string;
     images: string[] | null;
@@ -167,7 +167,7 @@ export default function UserDashboard({ stats, listings, recentInquiries }: Prop
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3 font-semibold text-gray-900">
-                                                    ${Number(listing.price).toLocaleString()}
+                                                    {listing.price ? `$${Number(listing.price).toLocaleString()}` : 'Email for Price'}
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-600">
                                                     {listing.city}, {listing.state}

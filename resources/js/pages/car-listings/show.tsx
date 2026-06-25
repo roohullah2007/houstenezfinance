@@ -16,7 +16,7 @@ interface CarListing {
     make: string;
     model: string;
     year: number;
-    price: string;
+    price: string | null;
     miles: number;
     exterior_color: string;
     interior_color: string;
@@ -298,7 +298,7 @@ export default function ShowCarListing({ listing, availableFeatures = [] }: Prop
                                 <h1 className="text-xl font-bold text-gray-900">{listing.title}</h1>
                                 <p className="mt-1 text-sm text-gray-500">{listing.year} {listing.make} {listing.model}</p>
                                 <p className="mt-4 text-4xl font-bold" style={{ color: ACCENT }}>
-                                    ${Number(listing.price).toLocaleString()}
+                                    {listing.price ? `$${Number(listing.price).toLocaleString()}` : 'Email for Price'}
                                 </p>
                                 <p className="mt-2 flex items-center gap-1 text-sm text-gray-500">
                                     <MapPin className="h-4 w-4" />
