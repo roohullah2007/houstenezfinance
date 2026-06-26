@@ -27,9 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned: Node 22.23.0 has a sourcemap-decode regression that breaks
-          # Vite 8's config loading ("InvalidCharacterError"). 22.20.0 builds fine.
-          node-version: "22.20.0"
+          node-version: "20"
 
       - name: Build Frontend
         run: |
